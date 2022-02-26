@@ -78,10 +78,10 @@ void readString(char *string)
                 // Hapus Karakter sebelumnya
                 interrupt (0x10, 0x0e * 256 + currentChar, 0, 0, 0);
                 interrupt (0x10, 0x0e * 256 + ' ', 0, 0, 0);	
-                // interrupt (0x10, 0x0e * 256 + currentChar, 0, 0, 0);	
+                interrupt (0x10, 0x0e * 256 + currentChar, 0, 0, 0);	
                 
                 // Karakter yang dihapus direplace nilainya dengan NULL(0)
-                string[i--] = 0;
+                string[--i] = 0;
                 // string[i--] = 0;
 			}
 		}
@@ -100,13 +100,11 @@ void readString(char *string)
 }
 void clearScreen(){
    int i = 0;
-//    char *vidmem = (char *) 0xb8000;
+
    while (i < 80*25*2){
       putInMemory(0xB000, 0x8000 +  i*2, '\0');
       putInMemory(0xB000, 0x8000 + i*2 +1, 0xF);
-    // vidmem[i]=' ';
-    // i++;
-    // vidmem[i]=0XF;
+  
     i++;
     
    }
