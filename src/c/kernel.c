@@ -14,15 +14,16 @@ int main(){
     printString("Halo duniassss!\r\n");
     readString(buf);
     printString(buf);
-    printString("----------\r\n");
-     readString(buf);
-    printString(buf);
-    printString("----------\r\n");
-     readString(buf);
-    printString(buf);
 
-    printString("----------\r\n");
-     readString(buf);
+	// Buat tes doang, tar dirapihin
+    printString("\r\n");
+    readString(buf);
+    printString(buf);
+    printString("\r\n");
+    readString(buf);
+    printString(buf);
+    printString("\r\n");
+    readString(buf);
     printString(buf);
 
 
@@ -34,20 +35,19 @@ int main(){
 void handleInterrupt21 (int AX, int BX, int CX, int DX){
 	switch (AX) {
     case 0x0:
-      printString(BX);
-      break;
+		printString(BX);
+      	break;
     case 0x1:
-      readString(BX);
-      break;
+		readString(BX);
+		break;
     default:
-      printString("Invalid interrupt");
+      	printString("Invalid interrupt");
   }
 
 }
 
 void printString (char* word)
 {
-	// interrupt(0x10, 0x0e * 256 + '\n', 0, 0, 0);
 	while (*word != '\0')
 	{
 		interrupt (0x10, 0x0e * 256 + *word, 0, 0, 0);
@@ -55,7 +55,7 @@ void printString (char* word)
 	}
 }
 
-
+//Kursor masih error. gatau dihandle atau ga
 void readString(char *string)
 {
 	int i = 0;
@@ -82,7 +82,6 @@ void readString(char *string)
                 
                 // Karakter yang dihapus direplace nilainya dengan NULL(0)
                 string[--i] = 0;
-                // string[i--] = 0;
 			}
 		}
 
@@ -98,16 +97,11 @@ void readString(char *string)
 	interrupt(0x10, 0xe00 + '\r', 0, 0, 0);		
 	
 }
-void clearScreen(){
-   int i = 0;
 
-   while (i < 80*25*2){
-      putInMemory(0xB000, 0x8000 +  i*2, '\0');
-      putInMemory(0xB000, 0x8000 + i*2 +1, 0xF);
-  
-    i++;
-    
-   }
+// Perlu dicek lagi
+void clearScreen(){
+	interrupt (0x10, 0x02, 0, 0xD, 0);
 }
+
 
 
