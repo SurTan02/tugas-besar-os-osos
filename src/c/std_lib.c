@@ -44,12 +44,39 @@ unsigned int strlen(char *string)
 }
 
 
-bool strcmp(char *s1, char *s2);
+bool strcmp(char *s1, char *s2)
 // Mengembalikan true jika string sama
+{
+    int flag;
+    char *c1 = s1;
+    char *c2 = s2;
+    
+    flag = strlen(s1) == strlen(s2);
+    int n = strlen(s1);
+    while (flag && n--)
+    {
+        flag = (*c1 == *c2);
+        *c1++;
+        *c2++;
+    }
+    return flag;
+}
 
-void strcpy(char *dst, char *src);
+
+void strcpy(char *dst, char *src)
 // Melakukan penyalinan null terminated string
-
-void clear(byte *ptr, unsigned int n);
+{
+    char *temp = dst;
+    while(*dst++ = *src++); // or while((*strDest++=*strSrc++) != '\0');
+    return temp;
+}
+void clear(byte *ptr, unsigned int n)
 // Mengosongkan byte array yang memiliki panjang n
+{
+    int i;
+    for (i = 0; i< n ; i++)
+    {
+        ptr[i] = '\0';
+    }
+}
 
