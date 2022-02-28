@@ -17,7 +17,7 @@ kernel:
 	dd if=out/kernel of=out/system.img bs=512 conv=notrunc seek=1
 
 stdlib:
-	# Opsional
+	bcc -ansi -c -o out/std_lib.o src/c/std_lib.c
 
 run:
 	bochs -f src/config/if2230.config
