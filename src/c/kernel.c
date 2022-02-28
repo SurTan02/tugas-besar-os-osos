@@ -12,23 +12,14 @@ int main(){
 
     printString("Halo dunia!\r\n");
     printString("Halo duniassss!\r\n");
-    readString(buf);
-    printString(buf);
 
-	// Buat tes doang, tar dirapihin
-    printString("\r\n");
-    readString(buf);
-    printString(buf);
-    printString("\r\n");
-    readString(buf);
-    printString(buf);
-    printString("\r\n");
-    readString(buf);
-    printString(buf);
+	while (true) 
+	{
+    	readString(buf);
+    	printString(buf);
+		printString("\r\n");
+	}
 
-
-
-	while (true);
     return 0;
 }
 
@@ -93,6 +84,8 @@ void readString(char *string)
 		}
 	}
 
+	string[i++] = '\0';
+
 	interrupt(0x10, 0xe00 + '\n', 0, 0, 0);		
 	interrupt(0x10, 0xe00 + '\r', 0, 0, 0);		
 	
@@ -105,6 +98,3 @@ void clearScreen(){
 	// Set warna putih
 	interrupt (0x10, 0x06*256 + 0, 0xF*256, 0, 25*256 + 80);
 }
-
-
-
