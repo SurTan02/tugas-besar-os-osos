@@ -98,9 +98,12 @@ void readString(char *string)
 	
 }
 
-// Perlu dicek lagi
 void clearScreen(){
-	interrupt (0x10, 0x02, 0, 0xD, 0);
+	// Set video mode 3
+	interrupt (0x10, 0x0*256 + 03,  0 , 0, 0);
+
+	// Set warna putih
+	interrupt (0x10, 0x06*256 + 0, 0xF*256, 0, 25*256 + 80);
 }
 
 
