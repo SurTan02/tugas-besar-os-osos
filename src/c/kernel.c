@@ -10,14 +10,30 @@ int main(){
     clearScreen();
     makeInterrupt21();
 
-    printString("Halo dunia!\r\n");
-    printString("Halo duniassss!\r\n");
+	printString("  ______        _______.  ______        _______.	\r\n");
+	printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
+	printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
+	printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
+	printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
+	printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
+                                                
+    printString("SELAMAT DATANG DI osOS!\r\n");
+    printString("TULISKAN NAMA ANDA : ");
+	readString(buf);
+	printString("Halo ");
+	printString(buf);
+	printString("\r\n");
 
+	printString("Ketik 'clear' untuk membersihkan layar : !\r\n");
 	while (true) 
 	{
     	readString(buf);
     	printString(buf);
 		printString("\r\n");
+
+		if (strcmp(buf, "clear")){
+			break;
+		}
 	}
 
     return 0;
@@ -34,7 +50,6 @@ void handleInterrupt21 (int AX, int BX, int CX, int DX){
     default:
       	printString("Invalid interrupt");
   }
-
 }
 
 void printString (char* word)
@@ -46,7 +61,7 @@ void printString (char* word)
 	}
 }
 
-//Kursor masih error. gatau dihandle atau ga
+
 void readString(char *string)
 {
 	int i = 0;
@@ -54,14 +69,13 @@ void readString(char *string)
 	while (true)
 	{
 		currentChar = interrupt (0x16, 0, 0, 0, 0);
-		
 		/* Input user berupa enter*/
 		if (currentChar == 0xd)
         {
             break;
         }
 		
-		/* Input is backspace */
+		/* Input user berupa backspace */
 		else if (currentChar== '\b')
 		{
 			if (i > 0)
@@ -72,7 +86,7 @@ void readString(char *string)
                 interrupt (0x10, 0x0e * 256 + currentChar, 0, 0, 0);	
                 
                 // Karakter yang dihapus direplace nilainya dengan NULL(0)
-                string[--i] = 0;
+                string[--i] = '\0';
 			}
 		}
 
