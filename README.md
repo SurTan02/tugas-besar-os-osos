@@ -26,5 +26,5 @@ sudo apt install nasm bcc bin86 bochs bochs-x make
 | Nama               | NIM         |
 |--------------------|-------------|
 | Suryanto              | 13520059 |
-| Brianaldo Phandiarta  | 13520161 |
-| M Syahrul Surya Putra | 13520113 |
+| Brianaldo Phandiarta  | 13520113 |
+| M Syahrul Surya Putra | 13520161 |
