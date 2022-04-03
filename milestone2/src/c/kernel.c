@@ -245,8 +245,10 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     struct map_filesystem    map_fs_buffer;
 	struct node_entry        node_buffer;
 	struct sector_entry      sector_entry_buffer;
-    int    i, parent,j;
-    bool   found, flag;
+    int                      i, parent, j;
+    int                      node_idx, sector_idx;
+    bool                     found, flag;
+    // byte                     buffer[16];
     // Tambahkan tipe data yang dibutuhkan
     
 	// Pembacaan storage ke buffer
@@ -291,6 +293,8 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     if (!found) {
         *return_code = FS_W_MAXIMUM_NODE_ENTRY;
         return;
+    } else {
+        node_idx = i;
     }
 
     // 3. Cek dan pastikan entry node pada indeks P adalah folder.
@@ -332,7 +336,7 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
         } else {
             i++;
         }
-    }       
+    }
 
     // Sector sudah penuh
     if (!found) {
@@ -358,42 +362,68 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     if (!found) {
         *return_code = FS_W_MAXIMUM_SECTOR_ENTRY;
         return;
+    } else {
+        sector_idx = i;
     }
     
     // Penulisan
     // 1. Tuliskan metadata nama dan byte P ke node pada memori buffer
-    strcopy(node_fs_buffer.nodes[i].name, metadata->node_name);
-    node_fs_buffer.nodes[i].parent_node_index = metadata->parent_index;
+    strcopy(node_fs_buffer.nodes[node_idx].name, metadata->node_name);
+    node_fs_buffer.nodes[node_idx].parent_node_index = metadata->parent_index;
 
-    // 2. Jika menulis folder, tuliskan byte S dengan nilai 
-    //    FS_NODE_S_IDX_FOLDER dan lompat ke langkah ke-8
+        // 2. Jika menulis folder, tuliskan byte S dengan nilai 
     if (metadata->filesize == 0) {
-        node_fs_buffer.nodes[i].sector_entry_index = FS_NODE_S_IDX_FOLDER;
+        node_fs_buffer.nodes[node_idx].sector_entry_index = FS_NODE_S_IDX_FOLDER;
+        //    FS_NODE_S_IDX_FOLDER dan lompat ke langkah ke-8
     } else {
         // 3. Jika menulis file, tuliskan juga byte S sesuai indeks sector
-        node_fs_buffer.nodes[i].sector_entry_index = i;
+        node_fs_buffer.nodes[node_idx].sector_entry_index = sector_idx;
+
         // 4. Persiapkan variabel j = 0 untuk iterator entry sector yang kosong
         j = 0;
+
         // 5. Persiapkan variabel buffer untuk entry sector kosong
+        // byte buffer[16];
+        // sector_entry_buffer
 
         // 6. Lakukan iterasi berikut dengan kondisi perulangan (penulisan belum selesai && i = 0..255)
-        //    1. Cek apakah map[i] telah terisi atau tidak
-        //    2. Jika terisi, lanjutkan ke iterasi selanjutnya / continue
-        //    3. Tandai map[i] terisi
-        //    4. Ubah byte ke-j buffer entri sector dengan i
-        //    5. Tambah nilai j dengan 1
-        //    6. Lakukan writeSector() dengan file pointer buffer pada metadata 
-        //       dan sektor tujuan i
-        //    7. Jika ukuran file yang telah tertulis lebih besar atau sama dengan
-        //       filesize pada metadata, penulisan selesai
+        flag = false;
+        i = 0;
+        while (i < 256 && !flag) {
+            //    1. Cek apakah map[i] telah terisi atau tidak
+            if (map_fs_buffer.is_filled[i]) {
+                //    2. Jika terisi, lanjutkan ke iterasi selanjutnya / continue
+                // do nothing
+            } else {
+                //    3. Tandai map[i] terisi
+                map_fs_buffer.is_filled[i] = true;
+                //    4. Ubah byte ke-j buffer entri sector dengan i
+                sector_entry_buffer.sector_numbers[j] = i;
+                //    5. Tambah nilai j dengan 1
+                j++;
+                //    6. Lakukan writeSector() dengan file pointer buffer pada metadata 
+                //       dan sektor tujuan i
+                writeSector(metadata->buffer, i);
+                //    7. Jika ukuran file yang telah tertulis lebih besar atau sama dengan
+                //       filesize pada metadata, penulisan selesai
+                if (j * 512 >= metadata->filesize) flag = true;
+            }
+            i++;
+        }
+
         // 7. Lakukan update dengan memcpy() buffer entri sector dengan 
         //    buffer filesystem sector
+        memcpy(sector_fs_buffer.sector_list[sector_idx].sector_numbers, sector_entry_buffer.sector_numbers, sizeof(sector_entry_buffer));
     }
-
 
     // 8. Lakukan penulisan seluruh filesystem (map, node, sector) ke storage
     //    menggunakan writeSector() pada sektor yang sesuai
+    writeSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER);
+    writeSector(&node_fs_buffer, FS_NODE_SECTOR_NUMBER);
+    writeSector(&sector_fs_buffer, FS_SECTOR_SECTOR_NUMBER);
+
     // 9. Kembalikan retcode FS_SUCCESS
+    *return_code = FS_SUCCESS;
 }
 
 
