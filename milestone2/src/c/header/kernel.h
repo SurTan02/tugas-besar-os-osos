@@ -1,7 +1,10 @@
 // Kernel header
 
+
+
 #include "std_datatype.h"
 #include "std_lib.h"
+// #include "util.h"
 
 // Fungsi bawaan
 extern void putInMemory(int segment, int address, char character);
@@ -22,5 +25,13 @@ void readSector(byte *buffer, int sector_number);
 void write(struct file_metadata *metadata, enum fs_retcode *return_code);
 void read(struct file_metadata *metadata, enum fs_retcode *return_code);
 
+void printCWD(char* path_str, byte current_dir);
 void shell();
+
 void fillMap();
+
+// void getArgument(char* input, char* arg1, char* arg2, char* arg3, char* arg4);
+void list(char current_dir);
+void changeDirectory(char dst, char current_dir);
+
+void split(char* input_buf, char* arg1, char* arg2);

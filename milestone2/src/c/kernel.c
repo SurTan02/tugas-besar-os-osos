@@ -8,8 +8,8 @@
 #include "header/filesystem.h"
 
 int main(){
-	// fillMap();
     char buf[128];
+	fillMap();
 	
     makeInterrupt21();
     clearScreen();
@@ -31,13 +31,14 @@ int main(){
 	printString("Ketik 'clear' untuk membersihkan layar : !\r\n");
 	while (true) 
 	{
-    	readString(buf);
-    	printString(buf);
-		printString("\r\n");
+        shell();
+    	// readString(buf);
+    	// printString(buf);
+		// printString("\r\n");
 
-		if (strcmp(buf, "clear")){
-			break;
-		}
+		// if (strcmp(buf, "clear")){
+		// 	break;
+		// }
 	}
 
     return 0;
@@ -57,12 +58,12 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
         case 0x3:
             writeSector(BX, CX);
             break;
-        // case 0x4:
-        //     read(BX, CX);
-        //     break;
-        // case 0x5:
-        //     write(BX, CX);
-        //     break;
+        case 0x4:
+            read(BX, CX);
+            break;
+        case 0x5:
+            write(BX, CX);
+            break;
         default:
             printString("Invalid Interrupt");
     }
@@ -172,8 +173,6 @@ void writeSector(byte *buffer, int sector_number){
         head | drive                // DX
     );
 }
-
-// void write(struct file_metadata *metadata, enum fs_retcode *return_code){}
 
 void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	struct node_filesystem   node_fs_buffer;
@@ -368,7 +367,7 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     
     // Penulisan
     // 1. Tuliskan metadata nama dan byte P ke node pada memori buffer
-    strcopy(node_fs_buffer.nodes[node_idx].name, metadata->node_name);
+    strcpy(node_fs_buffer.nodes[node_idx].name, metadata->node_name);
     node_fs_buffer.nodes[node_idx].parent_node_index = metadata->parent_index;
 
         // 2. Jika menulis folder, tuliskan byte S dengan nilai 
@@ -426,37 +425,79 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     *return_code = FS_SUCCESS;
 }
 
+void printCWD(char* path_str, byte current_dir) {
+    struct node_filesystem node_fs_buffer;
 
+    readSector(&node_fs_buffer, FS_NODE_SECTOR_NUMBER);
 
+    printString(path_str);
 
+    if (current_dir == FS_NODE_P_IDX_ROOT) { 
+        printString("~");
+    } else {
+        printString("/");
+        printString(node_fs_buffer.nodes[current_dir].name);
+    }
+}
 
+void list(char current_dir){
+    struct node_filesystem  node_fs_buffer;
+    int i;
 
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
+	readSector(&(node_fs_buffer.nodes[32]) , FS_NODE_SECTOR_NUMBER + 1);    //FILES
+
+    
+    for ( i = 0 ; i < 64 ; i++) {
+        if (node_fs_buffer.nodes[i].parent_node_index == current_dir && !strcmp(node_fs_buffer.nodes[i].name,"")){
+            printString(node_fs_buffer.nodes[i].name);
+            printString("\r\n");
+        }
+    }
+}
+
+// void changeDirectory(char dst,char current_dir){
+//     struct node_filesystem  node_fs_buffer;
+//     int i;
+
+//     readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
+// 	readSector(&(node_fs_buffer.nodes[32]) , FS_NODE_SECTOR_NUMBER + 1);    //FILES
+
+//     if (dst == )
+    
+// }
 
 void shell() {
     // IN PROGRESS
     char input_buf[64];
     char path_str[128];
+    char arg1[64], arg2[64];
     byte current_dir = FS_NODE_P_IDX_ROOT;
 
     while (true) {
         printString("OS@IF2230:");
-        printCWD(path_str, current_dir);
+        // printCWD(path_str, current_dir);
         printString("$ ");
-        readString(input_buf);
+        readString(input_buf);  
+   
+        split(input_buf, arg1, arg2);
 
-        if (strcmp(input_buf, "cd")) {
+        if (strcmp(arg1, "cd")) {
             // Disini CD
-        } else if (strcmp(input_buf, "ls")) {
-            // Disini LS
-        } else if (strcmp(input_buf, "mv")) {
+            // changeDirectory();
+            printString("ini cdini cd\r\n");
+        } else if (strcmp(arg1, "ls")) {
+            printString("Shindeiruini lsin\r\n");
+            list(current_dir); 
+        } else if (strcmp(arg1, "mv")) {
             // Disini mv
-        } else if (strcmp(input_buf, "mkdir")) {
+        } else if (strcmp(arg1, "mkdir")) {
             // Disini mkdir
-        } else if (strcmp(input_buf, "cat")) {
+        } else if (strcmp(arg1, "cat")) {
             // Disini cat
-        } else if (strcmp(input_buf, "cp")) {
+        } else if (strcmp(arg1, "cp")) {
             // Disini cp
-        }else {
+        } else {
             printString("Unknown command\r\n");
         }
     }
@@ -483,4 +524,56 @@ void fillMap() {
 
   // Update filesystem map
   writeSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER); 
+}
+
+// void getArgument(char* input_buf, char* arg1, char* arg2, char* arg3, char* arg4) {
+//     int i, j;
+    
+//     i = 0;
+//     while (input_buf[i] != ' ' && input_buf[i] != '\0') {
+//         arg1[i] = input_buf[i];
+//         i++;
+//     }
+//     arg1[i] = '\0';
+
+//     j = 0;
+//     while (input_buf[i] != ' ' && input_buf[i] != '\0') {
+//         arg2[j] = input_buf[i];
+//         i++; j++;
+//     }
+//     arg2[j] = '\0';
+
+//     j = 0;
+//     while (input_buf[i] != ' ' && input_buf[i] != '\0') {
+//         arg3[j] = input_buf[i];
+//         i++; j++;
+//     }
+//     arg3[j] = '\0';
+
+//     j = 0;
+//     while (input_buf[i] != '\0') {
+//         arg4[j] = input_buf[i];
+//         i++; j++;
+//     }
+//     arg4[j] = '\0';
+// }
+
+void split(char* input_buf, char* arg1, char* arg2) {
+    int i, j;
+    
+    i = 0;
+    while (input_buf[i] != ' ' && input_buf[i] != '\0') {
+        arg1[i] = input_buf[i];
+        i++;
+    }
+    arg1[i] = '\0';
+    i++;
+
+    j = 0;
+    while (input_buf[i] != '\0') {
+        arg2[j] = input_buf[i];
+        i++;
+        j++;
+    }
+    arg2[j] = '\0';
 }
