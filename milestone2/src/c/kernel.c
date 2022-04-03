@@ -181,6 +181,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	struct sector_entry      sector_entry_buffer;
     int    i, parent;
     bool   found;
+    char buf[8192];
     
 	// Pembacaan storage ke buffer
 	readSector(&sector_fs_buffer, FS_SECTOR_SECTOR_NUMBER); 
@@ -228,6 +229,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             // 6. Lompat ke iterasi selanjutnya hingga iterasi selesai
             // 7. Tulis retcode FS_SUCCESS pada akhir proses pembacaan.
             i = 0;
+            metadata->buffer = buf;
             while (sector_entry_buffer.sector_numbers[i] != 0x0 && i < 16) {
                 readSector(metadata->buffer, i);
                 i++;
@@ -425,47 +427,123 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     *return_code = FS_SUCCESS;
 }
 
-void printCWD(char* path_str, byte current_dir) {
+void printRec(char* path_str, byte current_dir) {
     struct node_filesystem node_fs_buffer;
 
-    readSector(&node_fs_buffer, FS_NODE_SECTOR_NUMBER);
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
+	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    
 
-    printString(path_str);
-
-    if (current_dir == FS_NODE_P_IDX_ROOT) { 
-        printString("~");
+    if (node_fs_buffer.nodes[current_dir].parent_node_index == FS_NODE_P_IDX_ROOT) {
+        printString(node_fs_buffer.nodes[current_dir].name);
+        return;
     } else {
+        printRec(path_str, node_fs_buffer.nodes[current_dir].parent_node_index);
         printString("/");
         printString(node_fs_buffer.nodes[current_dir].name);
     }
+
 }
 
-void list(char current_dir){
+void printCWD(char* path_str, byte current_dir) {
+    struct node_filesystem node_fs_buffer;
+    int index[64];
+    int i,idx;
+
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
+	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    
+
+    printString("~");
+    if (current_dir == FS_NODE_P_IDX_ROOT) { 
+        // do nothing
+    } else {
+        printRec(path_str, current_dir);
+        // i = current_dir;
+        // idx = 0;
+        // while (i != FS_NODE_P_IDX_ROOT) {
+        //     index[idx] = i;
+        //     // printString("/");
+        //     // printString(node_fs_buffer.nodes[i].name);
+        //     i = node_fs_buffer.nodes[i].parent_node_index;
+        //     idx++;
+        // }
+
+        // for (i = idx; i > -1; i--) {
+        //     printString("/");
+        //     printString(node_fs_buffer.nodes[index[i]].name);
+        // }
+    }
+}
+
+void list(byte current_dir){
     struct node_filesystem  node_fs_buffer;
     int i;
 
     readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
-	readSector(&(node_fs_buffer.nodes[32]) , FS_NODE_SECTOR_NUMBER + 1);    //FILES
+	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    //FILES
 
-    
-    for ( i = 0 ; i < 64 ; i++) {
+    for (i = 0 ; i < 64 ; i++) {
         if (node_fs_buffer.nodes[i].parent_node_index == current_dir && !strcmp(node_fs_buffer.nodes[i].name,"")){
             printString(node_fs_buffer.nodes[i].name);
+            if (node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
+                printString("/");
+            }
             printString("\r\n");
         }
     }
 }
 
-// void changeDirectory(char dst,char current_dir){
-//     struct node_filesystem  node_fs_buffer;
-//     int i;
+void changeDirectory(char *current_dir, char* arg){
+    struct node_filesystem  node_fs_buffer;
+    int i;
 
-//     readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
-// 	readSector(&(node_fs_buffer.nodes[32]) , FS_NODE_SECTOR_NUMBER + 1);    //FILES
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
+	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    //FILES
 
-//     if (dst == )
+    if (strcmp(arg, "/")) {
+        *current_dir = FS_NODE_P_IDX_ROOT;
+        // printString("Root\r\n");
+        return;
+    }
     
-// }
+    if (strcmp(arg, "..")) {
+        if (*current_dir != FS_NODE_P_IDX_ROOT){
+            *current_dir = node_fs_buffer.nodes[*current_dir].parent_node_index;
+            // printString("Mundur\r\n");
+            return;
+        }
+    }
+
+    for (i = 0; i < 64; i++) {
+        if (node_fs_buffer.nodes[i].parent_node_index == *current_dir && 
+            strcmp(arg, node_fs_buffer.nodes[i].name) && 
+            node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
+                *current_dir = i;
+                // printString("Masuk ");
+                // printString(node_fs_buffer.nodes[*current_dir].name);
+                // printString("\r\n");
+                return;
+        }
+    }
+    
+    printString("Directory not found!\r\n");
+}
+
+void makeDirectory(byte current_dir) {
+    struct node_filesystem  node_fs_buffer;
+    int i;
+
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
+	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);
+    printString(node_fs_buffer.nodes[current_dir].name);
+
+    // for (i = 0; i < 64 && node_fs_buffer.nodes[i] != 0x0; i++) {
+
+    // }
+    // if (i == 64) {
+    // printString("Limit sector") 
+    //    return;
+    //}
+}
 
 void shell() {
     // IN PROGRESS
@@ -474,25 +552,23 @@ void shell() {
     char arg1[64], arg2[64];
     byte current_dir = FS_NODE_P_IDX_ROOT;
 
+    
     while (true) {
         printString("OS@IF2230:");
-        // printCWD(path_str, current_dir);
+        printCWD(path_str, current_dir);
         printString("$ ");
         readString(input_buf);  
-   
+        
         split(input_buf, arg1, arg2);
 
         if (strcmp(arg1, "cd")) {
-            // Disini CD
-            // changeDirectory();
-            printString("ini cdini cd\r\n");
+            changeDirectory(&(current_dir), arg2);
         } else if (strcmp(arg1, "ls")) {
-            printString("Shindeiruini lsin\r\n");
             list(current_dir); 
         } else if (strcmp(arg1, "mv")) {
             // Disini mv
         } else if (strcmp(arg1, "mkdir")) {
-            // Disini mkdir
+            makeDirectory(current_dir);
         } else if (strcmp(arg1, "cat")) {
             // Disini cat
         } else if (strcmp(arg1, "cp")) {
