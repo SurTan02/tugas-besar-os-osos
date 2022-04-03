@@ -25,6 +25,8 @@ void readSector(byte *buffer, int sector_number);
 void write(struct file_metadata *metadata, enum fs_retcode *return_code);
 void read(struct file_metadata *metadata, enum fs_retcode *return_code);
 
+void printRec(char* path_str, byte current_dir);
+
 void printCWD(char* path_str, byte current_dir);
 void shell();
 
@@ -33,5 +35,5 @@ void fillMap();
 // void getArgument(char* input, char* arg1, char* arg2, char* arg3, char* arg4);
 void list(char current_dir);
 void changeDirectory(char dst, char current_dir);
-
+void makeDirectory(byte current_dir, char* arg);
 void split(char* input_buf, char* arg1, char* arg2);
