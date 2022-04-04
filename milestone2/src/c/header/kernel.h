@@ -34,10 +34,9 @@ void shell();
 
 void fillMap();
 
-// void getArgument(char* input, char* arg1, char* arg2, char* arg3, char* arg4);
+void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size);
 void list(char current_dir);
 void changeDirectory(char dst, char current_dir);
 void makeDirectory(byte current_dir, char* arg);
 void cat(byte current_dir, char* arg2);
-void split(char* input_buf, char* arg1, char* arg2);
 void printInt(int x);

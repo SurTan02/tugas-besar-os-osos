@@ -595,7 +595,8 @@ void shell() {
     // IN PROGRESS
     char input_buf[64];
     char path_str[128];
-    char arg1[64], arg2[64];
+    char argv[4][64];
+    int argc;
     byte current_dir = FS_NODE_P_IDX_ROOT;
 
     
@@ -604,30 +605,35 @@ void shell() {
         printCWD(path_str, current_dir);
         printString("$ ");
         readString(input_buf);  
-        
-        split(input_buf, arg1, arg2);
 
-        if (strcmp(arg1, "ls")) {
-            list(current_dir); 
+        getArgument(input_buf, &argc, (char *)argv, 4, 64);
+
+        if (strcmp(argv[0], "ls")) {
+            if (argc != 1) printString("Too many arguments\r\n");
+            else list(current_dir); 
         }
-        else if (strcmp(arg1, "cd")) {
-            changeDirectory(&(current_dir), arg2);
-        } else if (strcmp(arg1, "mv")) {
+        else if (strcmp(argv[0], "cd")) {
+            if (argc == 2) changeDirectory(&(current_dir), argv[1]);
+            else if (argc == 1) printString("Too few arguments\r\n");
+            else printString("Too many arguments\r\n");
+        } else if (strcmp(argv[0], "mv")) {
             // Disini mv
-        } else if (strcmp(arg1, "mkdir")) {
-            makeDirectory(current_dir, arg2);
-        } else if (strcmp(arg1, "cat")) {
-            // Disini cat
-            cat(current_dir, arg2);
-        } else if (strcmp(arg1, "cp")) {
-            
+        } else if (strcmp(argv[0], "mkdir")) {
+            if (argc == 2) makeDirectory(current_dir, argv[1]);
+            else if (argc == 1) printString("Too few arguments\r\n");
+            else printString("Too many arguments\r\n");
+        } else if (strcmp(argv[0], "cat")) {
+            if (argc == 2) cat(current_dir, argv[1]);
+            else if (argc == 1) printString("Too few arguments\r\n");
+            else printString("Too many arguments\r\n");
+        } else if (strcmp(argv[0], "cp")) {
+            // Disini cp
         } else {
             printString("Unknown command\r\n");
         }
 
         clear(input_buf, strlen(input_buf));
-        clear(arg1, strlen(arg1));
-        clear(arg2, strlen(arg2));
+        clear(argv, 4 * 64);
     }
 }
 
@@ -653,55 +659,27 @@ void fillMap() {
   writeSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER); 
 }
 
-// void getArgument(char* input_buf, char* arg1, char* arg2, char* arg3, char* arg4) {
-//     int i, j;
-    
-//     i = 0;
-//     while (input_buf[i] != ' ' && input_buf[i] != '\0') {
-//         arg1[i] = input_buf[i];
-//         i++;
-//     }
-//     arg1[i] = '\0';
-
-//     j = 0;
-//     while (input_buf[i] != ' ' && input_buf[i] != '\0') {
-//         arg2[j] = input_buf[i];
-//         i++; j++;
-//     }
-//     arg2[j] = '\0';
-
-//     j = 0;
-//     while (input_buf[i] != ' ' && input_buf[i] != '\0') {
-//         arg3[j] = input_buf[i];
-//         i++; j++;
-//     }
-//     arg3[j] = '\0';
-
-//     j = 0;
-//     while (input_buf[i] != '\0') {
-//         arg4[j] = input_buf[i];
-//         i++; j++;
-//     }
-//     arg4[j] = '\0';
-// }
-
-void split(char* input_buf, char* arg1, char* arg2) {
+void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size) {
     int i, j;
-    
-    i = 0;
-    while (input_buf[i] != ' ' && input_buf[i] != '\0') {
-        arg1[i] = input_buf[i];
+
+    i = 0; j = 0; (*argc) = 0;
+    while (input_buf[i] != '\0' && (*argc) < maxArg - 1) {
+        if (input_buf[i] == ' ') {
+            argv[(*argc) * size + j] = '\0';
+            j = 0; (*argc)++;
+        } else {
+            argv[(*argc) * size + j] = input_buf[i];
+            j++;
+        }
         i++;
     }
-    arg1[i] = '\0';
-    i++;
 
-    j = 0;
     while (input_buf[i] != '\0') {
-        arg2[j] = input_buf[i];
-        i++;
-        j++;
+        argv[(*argc) * size + j] = input_buf[i];
+        i++; j++;
     }
-    arg2[j] = '\0';
-}
 
+    argv[(*argc) * size + j] = '\0';
+
+    (*argc)++;
+}
