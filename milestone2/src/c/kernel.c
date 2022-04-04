@@ -7,7 +7,7 @@
 #include "header/kernel.h"
 #include "header/filesystem.h"
 
-int main(){
+int main() {
     // char buf[128];
 	fillMap();
 	
@@ -103,8 +103,7 @@ void printInt(int x) {
     printString(reverse);
 }
 
-void printString (char* word)
-{
+void printString (char* word) {
 	while (*word != '\0')
 	{
 		interrupt (0x10, 0x0e * 256 + *word, 0, 0, 0);		
@@ -112,8 +111,7 @@ void printString (char* word)
 	}
 }
 
-void printFileContent(char *string)
-{
+void printFileContent(char *string) {
 	while (*string != '\0')
 	{
         if (*string == '\n') interrupt (0x10, 0x0e * 256 + '\r', 0, 0, 0);	
@@ -124,8 +122,7 @@ void printFileContent(char *string)
 	}
 }
 
-void readString(char *string)
-{
+void readString(char *string) {
 	int i = 0;
 	char currentChar = 0;
 	while (true)
@@ -167,14 +164,13 @@ void readString(char *string)
 	
 }
 
-void clearScreen(){
+void clearScreen() {
 	// Set video mode 3
 	interrupt (0x10, 0x0*256 + 03,  0 , 0, 0);
 
 	// Set warna putih
 	interrupt (0x10, 0x06*256 + 0, 0xF*256, 0, 25*256 + 80);
 }
-
 
 void readSector(byte *buffer, int sector_number) {
     int sector_read_count = 0x01;
@@ -196,9 +192,8 @@ void readSector(byte *buffer, int sector_number) {
     );
 }
 
-
 //Harusnya mirip Read cuma beda variabel AX. karena batasan lainnya sama
-void writeSector(byte *buffer, int sector_number){
+void writeSector(byte *buffer, int sector_number) {
 	int sector_read_count = 0x01;
     int cylinder, sector;
     int head, drive;
@@ -524,7 +519,7 @@ void list(byte current_dir){
     }
 }
 
-void changeDirectory(char *current_dir, char* arg){
+void changeDirectory(char *current_dir, char* arg) {
     struct node_filesystem  node_fs_buffer;
     int i;
 
@@ -568,7 +563,7 @@ void makeDirectory(byte current_dir, char* arg) {
     write(metadata, &return_code);
 }
 
-void cat(byte current_dir, char* arg2){
+void cat(byte current_dir, char* arg2) {
     struct node_filesystem  node_fs_buffer;
     struct file_metadata*   src;
     enum   fs_retcode       return_code;
@@ -589,6 +584,138 @@ void cat(byte current_dir, char* arg2){
     // printString(" ini ret code\r\n");
     // printString(src->buffer);
     // write(metadata, &return_code);
+}
+
+void move(byte current_dir, char* src, char* dst) {
+    struct node_filesystem  node_fs_buffer;
+    int i, idxSrc, parentIdx;
+    bool found, isFolderSrc, isFolderDst;
+    char name[14];
+
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);
+	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);
+    
+    // cari indeks src
+    found = false;
+    i = 0;
+    while (i < 64 && !found) {
+        if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
+        strcmp(node_fs_buffer.nodes[i].name, src)) {
+            found = true;
+            idxSrc = i;
+        } else {
+            i++;
+        }
+    }
+
+    isFolderSrc = node_fs_buffer.nodes[idxSrc].sector_entry_index == FS_NODE_S_IDX_FOLDER;
+
+    if (dst[0] == '/') {
+        // pindahin ke root
+
+        // Dapetin nama
+        strcpy(name, dst+1);
+        
+        // cek apakah ada file atau folder dengan nama yang sama di root
+        found = false;
+        i = 0;
+        while (i < 64 && !found) {
+            isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
+            if (node_fs_buffer.nodes[i].parent_node_index == FS_NODE_P_IDX_ROOT && 
+            strcmp(node_fs_buffer.nodes[i].name, name) && 
+            isFolderDst == isFolderSrc) {
+                found = true;
+            } else {
+                i++;
+            }
+        }
+
+        if (found) {
+            printString("File or folder already exist\r\n");
+            return;
+        }
+
+        // change parent index to root index
+        node_fs_buffer.nodes[idxSrc].parent_node_index = FS_NODE_P_IDX_ROOT;
+
+        // change name
+        strcpy(node_fs_buffer.nodes[idxSrc].name, name); 
+        printString("mv berhasil\r\n");
+    } else if (dst[0] == '.' && dst[1] == '.' && dst[2] == '/') {
+        // pindahin mundur
+
+        // Dapetin nama
+        strcpy(name, dst+3);
+
+        // cek apakah ada file atau folder dengan nama yang sama di direktori
+        parentIdx = node_fs_buffer.nodes[current_dir].parent_node_index;
+
+        found = false;
+        i = 0;
+        while (i < 64 && !found) {
+            isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
+            if (node_fs_buffer.nodes[i].parent_node_index == parentIdx && 
+            strcmp(node_fs_buffer.nodes[i].name, name) && 
+            isFolderDst == isFolderSrc) {
+                found = true;
+            } else {
+                i++;
+            }
+        }
+
+        if (found) {
+            printString("File or folder already exist\r\n");
+            return;
+        }
+
+        // change parent index to root index
+        node_fs_buffer.nodes[idxSrc].parent_node_index = parentIdx;
+
+        // change name
+        strcpy(node_fs_buffer.nodes[idxSrc].name, name); 
+    } else {
+        // Pindahin maju ato langsung rename
+
+        // Dapetin nama
+        strcpy(name, dst);
+
+        // cari destinasi
+        found = false;
+        i = 0;
+        while (i < 64 && !found) {
+            if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
+            strcmp(node_fs_buffer.nodes[i].name, name)) {
+                found = true;
+            } else {
+                i++;
+            }
+        }
+
+        if (found) {
+            isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
+            // kalo misalkan arg3 ternyata ada dan merupakan foler"
+            // dia pindahin arg2 ke dalam
+            if (isFolderDst) {
+                // change parent index
+                node_fs_buffer.nodes[idxSrc].parent_node_index = i;
+
+                // change name
+                strcpy(node_fs_buffer.nodes[idxSrc].name, name); 
+            } else {
+                // kala arg3 ada , file
+                // tolak
+                printString("File or folder already exist\r\n");
+                return;
+            }
+        } else {
+            // kalo arg3 tidak ada
+            // change name
+            strcpy(node_fs_buffer.nodes[idxSrc].name, name);
+        }
+    }
+
+    writeSector(&(node_fs_buffer.nodes[0]), FS_NODE_SECTOR_NUMBER);
+    writeSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
 }
 
 void shell() {
@@ -618,6 +745,7 @@ void shell() {
             else printString("Too many arguments\r\n");
         } else if (strcmp(argv[0], "mv")) {
             // Disini mv
+            move(current_dir, argv[1], argv[2]);
         } else if (strcmp(argv[0], "mkdir")) {
             if (argc == 2) makeDirectory(current_dir, argv[1]);
             else if (argc == 1) printString("Too few arguments\r\n");

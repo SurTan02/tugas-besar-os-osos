@@ -39,4 +39,5 @@ void list(char current_dir);
 void changeDirectory(char dst, char current_dir);
 void makeDirectory(byte current_dir, char* arg);
 void cat(byte current_dir, char* arg2);
+void move(byte current_dir, char* src, char* dst);
 void printInt(int x);
