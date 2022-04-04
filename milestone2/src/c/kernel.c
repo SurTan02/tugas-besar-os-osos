@@ -256,7 +256,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             // 1. memcpy() entry sector sesuai dengan byte S
             
             // memcpy(&node_buffer, &(node_fs_buffer.nodes[i]), 16);
-            memcpy(&node_buffer, &(node_fs_buffer.nodes[i]), sizeof(node_buffer));
+            // memcpy(&node_buffer, &(node_fs_buffer.nodes[i]), sizeof(node_buffer));
             memcpy(&sector_entry_buffer,&sector_fs_buffer.sector_list[node_fs_buffer.nodes[i].sector_entry_index], sizeof(sector_entry_buffer));
 
             // 2. Lakukan iterasi proses berikut, i = 0..15
@@ -269,7 +269,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             i = 0;
             metadata->buffer = buf;
             while (sector_entry_buffer.sector_numbers[i] != 0x0 && i < 16) {
-                readSector(metadata->buffer, sector_entry_buffer.sector_numbers[i]);
+                readSector(metadata->buffer+i*512, sector_entry_buffer.sector_numbers[i]);
                 i++;
             }
             metadata->filesize = i * 512;
@@ -277,6 +277,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
         }
     }
 }
+         
 
 void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     struct node_filesystem   node_fs_buffer;
@@ -563,27 +564,32 @@ void makeDirectory(byte current_dir, char* arg) {
     write(metadata, &return_code);
 }
 
-void cat(byte current_dir, char* arg2) {
+void cat(byte current_dir, char* arg2){
     struct node_filesystem  node_fs_buffer;
     struct file_metadata*   src;
     enum   fs_retcode       return_code;
     int    i;
     char   buf[8192];
 
-
+    clear(buf, 8192);
     strcpy(src->node_name, arg2);
     src->parent_index = current_dir;
     src->filesize = 0;
-    src->buffer = buf;
+    // src->buffer = buf;
 
     read(src, &return_code);
-    // printInt(return_code);
-    printFileContent(src->buffer);
-
     
-    // printString(" ini ret code\r\n");
-    // printString(src->buffer);
-    // write(metadata, &return_code);
+    if (return_code == FS_R_NODE_NOT_FOUND){
+        printString("No such file or directory\r\n");
+    }
+    else if (return_code == FS_R_TYPE_IS_FOLDER){
+        printString(arg2);
+        printString(" is a directory\r\n");
+    }
+    else{
+        printFileContent(src->buffer);
+        printString("\r\n");
+    }
 }
 
 void move(byte current_dir, char* src, char* dst) {
