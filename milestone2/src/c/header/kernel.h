@@ -16,7 +16,9 @@ void fillKernelMap();
 
 // TODO : Implementasikan
 void printString(char *string);
+void printFileContent(char *string);
 void readString(char *string);
+
 void clearScreen();
 
 void writeSector(byte *buffer, int sector_number);
@@ -36,5 +38,6 @@ void fillMap();
 void list(char current_dir);
 void changeDirectory(char dst, char current_dir);
 void makeDirectory(byte current_dir, char* arg);
+void cat(byte current_dir, char* arg2);
 void split(char* input_buf, char* arg1, char* arg2);
-void printIntToString(int x);
+void printInt(int x);

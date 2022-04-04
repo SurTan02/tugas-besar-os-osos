@@ -24,9 +24,9 @@ int main(){
     
 
     printString("seribu >>");
-    printIntToString(1000);
-     printString("\r\nsatu dua tiga >>");
-    printIntToString(123);
+    printInt(1000);
+    printString("\r\nsatu dua tiga >>");
+    printInt(123);
     printString("\r\n");
        
     // printString("SELAMAT DATANG DI osOS!\r\n");
@@ -77,7 +77,7 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
     }
 }
 
-void printIntToString (int x) {
+void printInt(int x) {
     char string[16];
     char reverse[16];
     int i;
@@ -107,11 +107,22 @@ void printString (char* word)
 {
 	while (*word != '\0')
 	{
-		interrupt (0x10, 0x0e * 256 + *word, 0, 0, 0);
+		interrupt (0x10, 0x0e * 256 + *word, 0, 0, 0);		
 		word++;
 	}
 }
 
+void printFileContent(char *string)
+{
+	while (*string != '\0')
+	{
+        if (*string == '\n') interrupt (0x10, 0x0e * 256 + '\r', 0, 0, 0);	
+
+		interrupt (0x10, 0x0e * 256 + *string, 0, 0, 0);		
+		string++;
+        
+	}
+}
 
 void readString(char *string)
 {
@@ -263,10 +274,10 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             i = 0;
             metadata->buffer = buf;
             while (sector_entry_buffer.sector_numbers[i] != 0x0 && i < 16) {
-                readSector(metadata->buffer, i);
+                readSector(metadata->buffer, sector_entry_buffer.sector_numbers[i]);
                 i++;
             }
-            metadata->filesize = i;
+            metadata->filesize = i * 512;
             *return_code = FS_SUCCESS;
         }
     }
@@ -557,6 +568,29 @@ void makeDirectory(byte current_dir, char* arg) {
     write(metadata, &return_code);
 }
 
+void cat(byte current_dir, char* arg2){
+    struct node_filesystem  node_fs_buffer;
+    struct file_metadata*   src;
+    enum   fs_retcode       return_code;
+    int    i;
+    char   buf[8192];
+
+
+    strcpy(src->node_name, arg2);
+    src->parent_index = current_dir;
+    src->filesize = 0;
+    src->buffer = buf;
+
+    read(src, &return_code);
+    // printInt(return_code);
+    printFileContent(src->buffer);
+
+    
+    // printString(" ini ret code\r\n");
+    // printString(src->buffer);
+    // write(metadata, &return_code);
+}
+
 void shell() {
     // IN PROGRESS
     char input_buf[64];
@@ -584,8 +618,9 @@ void shell() {
             makeDirectory(current_dir, arg2);
         } else if (strcmp(arg1, "cat")) {
             // Disini cat
+            cat(current_dir, arg2);
         } else if (strcmp(arg1, "cp")) {
-            // Disini cp
+            
         } else {
             printString("Unknown command\r\n");
         }
