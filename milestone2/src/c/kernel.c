@@ -444,15 +444,15 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
                 //    5. Tambah nilai j dengan 1
                 j++;
                 //    6. Lakukan writeSector() dengan file pointer buffer pada metadata 
+                writeSector(metadata->buffer + ((j-1) * 512), i + FS_SECTOR_SECTOR_NUMBER);
                 //       dan sektor tujuan i
-                writeSector(metadata->buffer, i);
                 //    7. Jika ukuran file yang telah tertulis lebih besar atau sama dengan
                 //       filesize pada metadata, penulisan selesai
                 if (j * 512 >= metadata->filesize) flag = true;
             }
             i++;
         }
-
+        
         // 7. Lakukan update dengan memcpy() buffer entri sector dengan 
         //    buffer filesystem sector
         memcpy(sector_fs_buffer.sector_list[sector_idx].sector_numbers, sector_entry_buffer.sector_numbers, sizeof(sector_entry_buffer));
@@ -589,6 +589,35 @@ void cat(byte current_dir, char* arg2){
     else{
         printFileContent(src->buffer);
         printString("\r\n");
+    }
+}
+
+void cp(byte current_dir, char* src, char* dest) {
+    struct node_filesystem  node_fs_buffer;
+    struct file_metadata*   srcFile, *dstFile;
+    enum   fs_retcode       return_code;
+    int    i;
+    char buf[8192];
+
+    strcpy(srcFile->node_name, src);
+    srcFile->parent_index = current_dir;
+    srcFile->filesize = 0;
+
+    read(srcFile, &return_code);
+
+    if (return_code == FS_R_NODE_NOT_FOUND) {
+        printString("No such file or directory\r\n");
+    } else if (return_code == FS_R_TYPE_IS_FOLDER) {
+        printString(src);
+        printString(" is a directory\r\n");
+    } else {
+        strcpy(dstFile->node_name, dest);
+        dstFile->parent_index = srcFile->parent_index;
+        dstFile->filesize = srcFile->filesize;
+        strcpy(dstFile->buffer, srcFile->buffer);
+
+        // printFileContent(dstFile->buffer);
+        write(dstFile, &return_code);
     }
 }
 
@@ -746,25 +775,30 @@ void shell() {
         if (strcmp(argv[0], "ls")) {
             if (argc != 1) printString("Too many arguments\r\n");
             else list(current_dir); 
-        }
-        else if (strcmp(argv[0], "cd")) {
+
+        } else if (strcmp(argv[0], "cd")) {
             if (argc == 2) changeDirectory(&(current_dir), argv[1]);
             else if (argc == 1) printString("Too few arguments\r\n");
             else printString("Too many arguments\r\n");
+
         } else if (strcmp(argv[0], "mv")) {
             if (argc == 3) move(current_dir, argv[1], argv[2]);
             else if (argc < 3) printString("Too few arguments\r\n");
             else printString("Too many arguments\r\n");
+
         } else if (strcmp(argv[0], "mkdir")) {
             if (argc == 2) makeDirectory(current_dir, argv[1]);
             else if (argc == 1) printString("Too few arguments\r\n");
             else printString("Too many arguments\r\n");
+
         } else if (strcmp(argv[0], "cat")) {
             if (argc == 2) cat(current_dir, argv[1]);
             else if (argc == 1) printString("Too few arguments\r\n");
             else printString("Too many arguments\r\n");
+
         } else if (strcmp(argv[0], "cp")) {
-            // Disini cp
+            cp(current_dir, argv[1], argv[2]);
+
         } else {
             printString("Unknown command\r\n");
         }
