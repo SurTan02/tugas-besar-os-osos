@@ -608,6 +608,11 @@ void move(byte current_dir, char* src, char* dst) {
         }
     }
 
+    if (!found) {
+        printString("No file or Folder found\r\n");
+        return;
+    }
+
     isFolderSrc = node_fs_buffer.nodes[idxSrc].sector_entry_index == FS_NODE_S_IDX_FOLDER;
 
     if (dst[0] == '/') {
@@ -698,9 +703,6 @@ void move(byte current_dir, char* src, char* dst) {
             if (isFolderDst) {
                 // change parent index
                 node_fs_buffer.nodes[idxSrc].parent_node_index = i;
-
-                // change name
-                strcpy(node_fs_buffer.nodes[idxSrc].name, name); 
             } else {
                 // kala arg3 ada , file
                 // tolak
@@ -744,8 +746,9 @@ void shell() {
             else if (argc == 1) printString("Too few arguments\r\n");
             else printString("Too many arguments\r\n");
         } else if (strcmp(argv[0], "mv")) {
-            // Disini mv
-            move(current_dir, argv[1], argv[2]);
+            if (argc == 3) move(current_dir, argv[1], argv[2]);
+            else if (argc < 3) printString("Too few arguments\r\n");
+            else printString("Too many arguments\r\n");
         } else if (strcmp(argv[0], "mkdir")) {
             if (argc == 2) makeDirectory(current_dir, argv[1]);
             else if (argc == 1) printString("Too few arguments\r\n");
