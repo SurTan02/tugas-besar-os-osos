@@ -8,7 +8,6 @@
 #include "header/filesystem.h"
 
 int main() {
-    // char buf[128];
 	fillMap();
 	
     makeInterrupt21();
@@ -21,25 +20,13 @@ int main() {
 	printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
 	printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
 
-   
-    // printString("SELAMAT DATANG DI osOS!\r\n");
-    // printString("TULISKAN NAMA ANDA : ");
-	// readString(buf);
-	// printString("Halo ");
-	// printString(buf);
-	// printString("\r\n");
+    // liveshare: https://prod.liveshare.vsengsaas.visualstudio.com/join?3374F66975C6DC5A7678010381EA56F659AF
+    // why?? because of reasons, tyvm
+    // gk bisa copy dari vb ke windows D:
 
-	// printString("Ketik 'clear' untuk membersihkan layar : !\r\n");
 	while (true) 
 	{
         shell();
-    	// readString(buf);
-    	// printString(buf);
-		// printString("\r\n");
-
-		// if (strcmp(buf, "clear")){
-		// 	break;
-		// }
 	}
 
     return 0;
