@@ -11,17 +11,14 @@ int main() {
 	fillMap();
 	
     makeInterrupt21();
-    clearScreen();
-
-    // Warnain Logo Biru
-    // interrupt (0x10, 0x06*256 + 0, 0xB*256, 0, 5*256 + 80);
-    
-	// printString("  ______        _______.  ______        _______.	\r\n");
-	// printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
-	// printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
-	// printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
-	// printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
-	// printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
+    clearScreen();    
+	interrupt (0x10, 0x06*256 + 0, 0xB*256, 0, 5*256 + 80);
+	printString("  ______        _______.  ______        _______.	\r\n");
+	printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
+	printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
+	printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
+	printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
+	printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
 
 	while (true) 
 	{
@@ -195,13 +192,13 @@ void writeSector(byte *buffer, int sector_number) {
 
 void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	struct node_filesystem   node_fs_buffer;
-	struct node_entry        node_buffer;
 	struct sector_filesystem sector_fs_buffer;
 	struct sector_entry      sector_entry_buffer;
     int    i,j;
     bool   found;
     char   buf[8192];
     
+    // clear(buf, 8192);
 	// Pembacaan storage ke buffer
 	readSector(&sector_fs_buffer, FS_SECTOR_SECTOR_NUMBER); 
 	readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
@@ -219,8 +216,6 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
     }
 
     // 2. Cek tipe node yang ditemukan
-    
-    
     //    Jika tidak ditemukan kecocokan, tuliskan retcode FS_R_NODE_NOT_FOUND dan keluar. 
     if (!found) *return_code = FS_R_NODE_NOT_FOUND;
     else{
@@ -232,9 +227,6 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
         } else {
             // Pembacaan
             // 1. memcpy() entry sector sesuai dengan byte S
-            
-            // memcpy(&node_buffer, &(node_fs_buffer.nodes[i]), 16);
-            // memcpy(&node_buffer, &(node_fs_buffer.nodes[i]), sizeof(node_buffer));
             memcpy(&sector_entry_buffer,&sector_fs_buffer.sector_list[node_fs_buffer.nodes[i].sector_entry_index], sizeof(sector_entry_buffer));
             
             // 2. Lakukan iterasi proses berikut, i = 0..15
@@ -245,20 +237,20 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             // 6. Lompat ke iterasi selanjutnya hingga iterasi selesai
             // 7. Tulis retcode FS_SUCCESS pada akhir proses pembacaan.
             i = 0;
-            // strcpy(metadata->buffer, buf);
+            
             while (sector_entry_buffer.sector_numbers[i] != 0x0 && i < 16) {
                 readSector(buf+i*512, sector_entry_buffer.sector_numbers[i]);
                 i++;
                 
             }
-            metadata->buffer = buf;
-            // strcpy(metadata->buffer, buf);
-            // for (j = 0; j < i; j++) {
-            //     printInt(j);
-            //     printString(" ini j\r\n");
-            //     metadata->buffer[j * 512] = buf + j*512;
-            // }
-            // clear(buf, i*512);
+            metadata->filesize = i * 512;
+
+            // magic trick, trust 
+            if (metadata->filesize >= 8192) {
+                metadata->buffer = buf;
+            } else { 
+                strcpy(metadata->buffer, buf);
+            }
             
             metadata->filesize = i * 512;
             *return_code = FS_SUCCESS;
@@ -564,7 +556,7 @@ void makeDirectory(byte current_dir, char* arg) {
     if (return_code != FS_SUCCESS){
         printReturnCode(arg, return_code);
     }else{
-        clear(metadata->buffer, div(metadata->filesize, 512));
+        clear(metadata->buffer, metadata->filesize);
         clear(metadata->node_name, strlen(metadata->node_name));
     }
 }
@@ -586,7 +578,7 @@ void cat(byte current_dir, char* arg2){
         printString("\r\n");
     }
 
-    clear(src->buffer, div(src->filesize, 512));
+    // clear(src->buffer, src->filesize);
 }
 
 void cp(byte current_dir, char* src, char* dest) {
@@ -611,7 +603,7 @@ void cp(byte current_dir, char* src, char* dest) {
         }
     }
 
-    clear(srcFile->buffer, srcFile->filesize);
+    // clear(srcFile->buffer, srcFile->filesize);
 }
 
 void move(byte current_dir, char* src, char* dst) {
