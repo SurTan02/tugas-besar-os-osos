@@ -13,16 +13,15 @@ int main() {
     makeInterrupt21();
     clearScreen();
 
-	printString("  ______        _______.  ______        _______.	\r\n");
-	printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
-	printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
-	printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
-	printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
-	printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
-
-    // liveshare: https://prod.liveshare.vsengsaas.visualstudio.com/join?3374F66975C6DC5A7678010381EA56F659AF
-    // why?? because of reasons, tyvm
-    // gk bisa copy dari vb ke windows D:
+    // Warnain Logo Biru
+    // interrupt (0x10, 0x06*256 + 0, 0xB*256, 0, 5*256 + 80);
+    
+	// printString("  ______        _______.  ______        _______.	\r\n");
+	// printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
+	// printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
+	// printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
+	// printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
+	// printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
 
 	while (true) 
 	{
@@ -94,11 +93,12 @@ void printString (char* word) {
 void printFileContent(char *string) {
 	while (*string != '\0')
 	{
-        if (*string == '\n') interrupt (0x10, 0x0e * 256 + '\r', 0, 0, 0);	
-
-		interrupt (0x10, 0x0e * 256 + *string, 0, 0, 0);		
-		string++;
-        
+        if (*string == '\n') {
+            interrupt (0x10, 0x0e * 256 + '\r', 0, 0, 0);
+        }
+        		
+        interrupt (0x10, 0x0e * 256 + *string, 0, 0, 0);
+        string++;
 	}
 }
 
@@ -146,7 +146,7 @@ void readString(char *string) {
 
 void clearScreen() {
 	// Set video mode 3
-	interrupt (0x10, 0x0*256 + 03,  0 , 0, 0);
+	interrupt (0x10, 0x0*256 + 03, 0, 0, 0);
 
 	// Set warna putih
 	interrupt (0x10, 0x06*256 + 0, 0xF*256, 0, 25*256 + 80);
@@ -208,10 +208,6 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	readSector(&(node_fs_buffer.nodes[32]) , FS_NODE_SECTOR_NUMBER + 1);    //FILES
 
     // 1. Cari node dengan nama dan lokasi yang sama pada filesystem.
-    //    Jika ditemukan node yang cocok, lanjutkan ke langkah ke-2.
-    //    Jika tidak ditemukan kecocokan, tuliskan retcode FS_R_NODE_NOT_FOUND
-    //    dan keluar.  
-
     found = false;
     i = 0;
     while (i < 64 && !found) {
@@ -223,14 +219,16 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
     }
 
     // 2. Cek tipe node yang ditemukan
-    //    Jika tipe node adalah file, lakukan proses pembacaan.
-    //    Jika tipe node adalah folder, tuliskan retcode FS_R_TYPE_IS_FOLDER
-    //    dan keluar.
     
+    
+    //    Jika tidak ditemukan kecocokan, tuliskan retcode FS_R_NODE_NOT_FOUND dan keluar. 
     if (!found) *return_code = FS_R_NODE_NOT_FOUND;
     else{
+        // Jika tipe node adalah folder, tuliskan retcode FS_R_TYPE_IS_FOLDER
         if (node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {               //Node saat ini FOLDER
             *return_code = FS_R_TYPE_IS_FOLDER;
+
+        //    Jika tipe node adalah file, lakukan proses pembacaan.
         } else {
             // Pembacaan
             // 1. memcpy() entry sector sesuai dengan byte S
@@ -238,7 +236,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             // memcpy(&node_buffer, &(node_fs_buffer.nodes[i]), 16);
             // memcpy(&node_buffer, &(node_fs_buffer.nodes[i]), sizeof(node_buffer));
             memcpy(&sector_entry_buffer,&sector_fs_buffer.sector_list[node_fs_buffer.nodes[i].sector_entry_index], sizeof(sector_entry_buffer));
-
+            
             // 2. Lakukan iterasi proses berikut, i = 0..15
             // 3. Baca byte entry sector untuk mendapatkan sector number partisi file
             // 4. Jika byte bernilai 0, selesaikan iterasi
@@ -247,13 +245,20 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             // 6. Lompat ke iterasi selanjutnya hingga iterasi selesai
             // 7. Tulis retcode FS_SUCCESS pada akhir proses pembacaan.
             i = 0;
-            strcpy(metadata->buffer, buf);
+            // strcpy(metadata->buffer, buf);
             while (sector_entry_buffer.sector_numbers[i] != 0x0 && i < 16) {
                 readSector(buf+i*512, sector_entry_buffer.sector_numbers[i]);
                 i++;
+                
             }
             strcpy(metadata->buffer, buf);
+            // for (j = 0; j < i; j++) {
+            //     printInt(j);
+            //     printString(" ini j\r\n");
+            //     metadata->buffer[j * 512] = buf + j*512;
+            // }
             clear(buf, i*512);
+            
             metadata->filesize = i * 512;
             *return_code = FS_SUCCESS;
         }
@@ -313,6 +318,7 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     }
     
     if (!found) {
+        // printString("Nodes Penuh sekaleeeeeeeeeeee\r\n");
         *return_code = FS_W_MAXIMUM_NODE_ENTRY;
         return;
     }
@@ -345,6 +351,8 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     }
     
     // Sector sudah penuh
+    // printInt(available*512);
+    // printString(" tersedia \r\n");
     if (available * 512 < metadata->filesize){
         *return_code = FS_W_NOT_ENOUGH_STORAGE;
         return;
@@ -481,17 +489,19 @@ void list(byte current_dir, int argc, char* arg){
         i = 0;
         found = false;
         while (i < 64 && !found) {
-            if (node_fs_buffer.nodes[i].parent_node_index = current_dir && 
+            // = tidak sama dengan ==
+            if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
             strcmp(node_fs_buffer.nodes[i].name, arg) &&
             node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
                 found = true;
+                j = i;
             } else {
                 i++;
             }
         }
 
         if (!found) {
-            printString("Folder not exist\r\n");
+            printReturnCode(arg, FS_R_NODE_NOT_FOUND);
             return;
         }
     } else {
@@ -537,7 +547,7 @@ void changeDirectory(char *current_dir, char* arg) {
         }
     }
     
-    printString("Directory not found!\r\n");
+    printReturnCode(arg, FS_R_NODE_NOT_FOUND);
 }
 
 void makeDirectory(byte current_dir, char* arg) {
@@ -582,13 +592,14 @@ void cp(byte current_dir, char* src, char* dest) {
     struct file_metadata    *srcFile, *dstFile;
     enum   fs_retcode       return_code;
     int    i;
-    // char buf[8192];
 
     strcpy(srcFile->node_name, src);
     srcFile->parent_index = current_dir;
     srcFile->filesize = 0;
 
+    
     read(srcFile, &return_code);
+    
     if (return_code != FS_SUCCESS){
         printReturnCode(src, return_code);
     } else {
@@ -597,7 +608,9 @@ void cp(byte current_dir, char* src, char* dest) {
         dstFile->filesize = srcFile->filesize;
         strcpy(dstFile->buffer, srcFile->buffer);
 
+        // printString("mau write\r\n");
         write(dstFile, &return_code);
+        // printString("DONE Write\r\n");
         if (return_code != FS_SUCCESS){
             printReturnCode(src, return_code);
         }
@@ -643,7 +656,7 @@ void move(byte current_dir, char* src, char* dst) {
         strcpy(name, dst+1);
 
         if (strcmp(name, "")) {
-            printString("Nama tidak valid\r\n");
+            printReturnCode(name, FS_R_NODE_NOT_FOUND);
             return;
         }
         
@@ -670,8 +683,8 @@ void move(byte current_dir, char* src, char* dst) {
         node_fs_buffer.nodes[idxSrc].parent_node_index = FS_NODE_P_IDX_ROOT;
 
         // change name
-        strcpy(node_fs_buffer.nodes[idxSrc].name, name); 
-        printString("mv berhasil\r\n");
+        strcpy(node_fs_buffer.nodes[idxSrc].name, name);
+        
     } else if (dst[0] == '.' && dst[1] == '.' && dst[2] == '/') {
         // pindahin mundur
 
@@ -679,7 +692,7 @@ void move(byte current_dir, char* src, char* dst) {
         strcpy(name, dst+3);
 
         if (strcmp(name, "")) {
-            printString("Nama tidak valid\r\n");
+            printReturnCode(name, FS_R_NODE_NOT_FOUND);
             return;
         }
 
@@ -759,7 +772,6 @@ void shell() {
     int argc;
     byte current_dir = FS_NODE_P_IDX_ROOT;
 
-    
     while (true) {
         printString("OS@IF2230:");
         printCWD(path_str, current_dir);
@@ -769,36 +781,37 @@ void shell() {
         getArgument(input_buf, &argc, (char *)argv, 4, 16);
 
         if (strcmp(argv[0], "ls")) {
-            if (argc > 2) printString("Too many arguments\r\n");
+            if (argc > 2) printReturnCode (argv[0], ARG_TOO_MANY);
             else list(current_dir, argc, argv[1]); 
 
         } else if (strcmp(argv[0], "cd")) {
             if (argc == 2) changeDirectory(&(current_dir), argv[1]);
-            else if (argc == 1) printString("Too few arguments\r\n");
-            else printString("Too many arguments\r\n");
+            else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
+            else printReturnCode (argv[0], ARG_TOO_MANY);
 
         } else if (strcmp(argv[0], "mv")) {
             if (argc == 3) move(current_dir, argv[1], argv[2]);
-            else if (argc < 3) printString("Too few arguments\r\n");
-            else printString("Too many arguments\r\n");
+            else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
+            else printReturnCode (argv[0], ARG_TOO_MANY);
 
         } else if (strcmp(argv[0], "mkdir")) {
             if (argc == 2) makeDirectory(current_dir, argv[1]);
-            else if (argc == 1) printString("Too few arguments\r\n");
-            else printString("Too many arguments\r\n");
+            else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
+            else printReturnCode (argv[0], ARG_TOO_MANY);
 
         } else if (strcmp(argv[0], "cat")) {
             if (argc == 2) cat(current_dir, argv[1]);
-            else if (argc == 1) printString("Too few arguments\r\n");
-            else printString("Too many arguments\r\n");
+            else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
+            else printReturnCode (argv[0], ARG_TOO_MANY);
 
         } else if (strcmp(argv[0], "cp")) {
-            cp(current_dir, argv[1], argv[2]);
+            if (argc == 3) cp(current_dir, argv[1], argv[2]);
+            else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
+            else printReturnCode (argv[0], ARG_TOO_MANY);     
 
         } else {
             printString("Unknown command\r\n");
         }
-
         clear(input_buf, strlen(input_buf));
         clear(argv, 4 * 16);
     }
@@ -851,7 +864,7 @@ void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size) {
     (*argc)++;
 }
 
-void printReturnCode(char *arg, enum fs_retcode return_code){
+void printReturnCode(char *arg, enum fs_retcode return_code) {
     switch (return_code)
     {
     case FS_R_NODE_NOT_FOUND:
@@ -878,10 +891,20 @@ void printReturnCode(char *arg, enum fs_retcode return_code){
         printString("Maximum Sector Entry\r\n");
         break;
 
-     case FS_W_INVALID_FOLDER:
+    case FS_W_INVALID_FOLDER:
         printString("Invalid Folder\r\n");
         break;
 
+    case ARG_TOO_MANY:
+        printString(arg);
+        printString(": Too many arguments\r\n");
+        break;
+
+    case ARG_TOO_FEW:
+        printString(arg);
+        printString(": Too few arguments\r\n");
+        break;
+        
     default:
         break;
     }

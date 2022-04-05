@@ -58,5 +58,9 @@ enum fs_retcode {
     FS_W_NOT_ENOUGH_STORAGE   = 4,
     FS_W_MAXIMUM_NODE_ENTRY   = 5,
     FS_W_MAXIMUM_SECTOR_ENTRY = 6,
-    FS_W_INVALID_FOLDER       = 7
+    FS_W_INVALID_FOLDER       = 7,
+
+    // Argument
+    ARG_TOO_MANY    = 8,
+    ARG_TOO_FEW     = 9
 };

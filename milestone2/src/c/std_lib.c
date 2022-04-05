@@ -17,7 +17,6 @@ int mod(int a, int n)
 	return a;
 }
 
-
 // Operasi standar bahasa C
 // Implementasikan
 void memcpy(byte *dest, byte *src, unsigned int n)
@@ -33,7 +32,6 @@ void memcpy(byte *dest, byte *src, unsigned int n)
 
 }
 
-
 unsigned int strlen(char *string)
 // Mengembalikan panjang suatu null terminated string
 {
@@ -42,7 +40,6 @@ unsigned int strlen(char *string)
         n++;
     return n;
 }
-
 
 bool strcmp(char *s1, char *s2)
 // Mengembalikan true jika string sama
@@ -59,12 +56,12 @@ bool strcmp(char *s1, char *s2)
 
 }
 
-
 void strcpy(char *dst, char *src)
 // Melakukan penyalinan null terminated string
 {
     while((*dst++=*src++) != '\0');
 }
+
 void clear(byte *ptr, unsigned int n)
 // Mengosongkan byte array yang memiliki panjang n
 {
@@ -74,4 +71,3 @@ void clear(byte *ptr, unsigned int n)
         ptr[i] = '\0';
     }
 }
-
