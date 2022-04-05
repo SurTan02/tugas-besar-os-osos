@@ -655,6 +655,11 @@ void move(byte current_dir, char* src, char* dst) {
 
         // Dapetin nama
         strcpy(name, dst+1);
+
+        if (strcmp(name, "")) {
+            printString("Nama tidak valid\r\n");
+            return;
+        }
         
         // cek apakah ada file atau folder dengan nama yang sama di root
         found = false;
@@ -686,6 +691,11 @@ void move(byte current_dir, char* src, char* dst) {
 
         // Dapetin nama
         strcpy(name, dst+3);
+
+        if (strcmp(name, "")) {
+            printString("Nama tidak valid\r\n");
+            return;
+        }
 
         // cek apakah ada file atau folder dengan nama yang sama di direktori
         parentIdx = node_fs_buffer.nodes[current_dir].parent_node_index;
