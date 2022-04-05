@@ -198,7 +198,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	struct node_entry        node_buffer;
 	struct sector_filesystem sector_fs_buffer;
 	struct sector_entry      sector_entry_buffer;
-    int    i;
+    int    i,j;
     bool   found;
     char   buf[8192];
     
@@ -251,13 +251,14 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
                 i++;
                 
             }
-            strcpy(metadata->buffer, buf);
+            metadata->buffer = buf;
+            // strcpy(metadata->buffer, buf);
             // for (j = 0; j < i; j++) {
             //     printInt(j);
             //     printString(" ini j\r\n");
             //     metadata->buffer[j * 512] = buf + j*512;
             // }
-            clear(buf, i*512);
+            // clear(buf, i*512);
             
             metadata->filesize = i * 512;
             *return_code = FS_SUCCESS;
@@ -352,12 +353,12 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     
     // Sector sudah penuh
     // printInt(available*512);
-    // printString(" tersedia \r\n");
+    
     if (available * 512 < metadata->filesize){
         *return_code = FS_W_NOT_ENOUGH_STORAGE;
         return;
     }
-
+    
     // Terdapat sector kosong
     // 5. Cek pada filesystem sector apakah terdapat entry yang masih kosong.
     //    Jika ada entry kosong dan akan menulis file, simpan indeks untuk 
@@ -589,35 +590,28 @@ void cat(byte current_dir, char* arg2){
 }
 
 void cp(byte current_dir, char* src, char* dest) {
-    struct file_metadata    *srcFile, *dstFile;
+    struct file_metadata*    srcFile;
     enum   fs_retcode       return_code;
     int    i;
 
     strcpy(srcFile->node_name, src);
     srcFile->parent_index = current_dir;
     srcFile->filesize = 0;
-
     
     read(srcFile, &return_code);
-    
+
     if (return_code != FS_SUCCESS){
         printReturnCode(src, return_code);
     } else {
-        strcpy(dstFile->node_name, dest);
-        dstFile->parent_index = srcFile->parent_index;
-        dstFile->filesize = srcFile->filesize;
-        strcpy(dstFile->buffer, srcFile->buffer);
+        strcpy(srcFile->node_name, dest);
+        write(srcFile, &return_code);
 
-        // printString("mau write\r\n");
-        write(dstFile, &return_code);
-        // printString("DONE Write\r\n");
         if (return_code != FS_SUCCESS){
             printReturnCode(src, return_code);
         }
-        clear(dstFile->buffer, div(dstFile->filesize, 512));
     }
 
-    clear(srcFile->buffer, div(srcFile->filesize, 512));
+    clear(srcFile->buffer, srcFile->filesize);
 }
 
 void move(byte current_dir, char* src, char* dst) {
