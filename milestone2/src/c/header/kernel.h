@@ -18,6 +18,8 @@ void fillKernelMap();
 void printString(char *string);
 void printFileContent(char *string);
 void readString(char *string);
+void printInt(int x);
+
 
 void clearScreen();
 
@@ -27,13 +29,11 @@ void readSector(byte *buffer, int sector_number);
 void write(struct file_metadata *metadata, enum fs_retcode *return_code);
 void read(struct file_metadata *metadata, enum fs_retcode *return_code);
 
+//Untuk shell
 void printRec(char* path_str, byte current_dir);
-
 void printCWD(char* path_str, byte current_dir);
 void shell();
-
 void fillMap();
-
 void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size);
 void list(char current_dir);
 void changeDirectory(char dst, char current_dir);
@@ -41,4 +41,4 @@ void makeDirectory(byte current_dir, char* arg);
 void cat(byte current_dir, char* arg2);
 void cp(byte current_dir, char* src, char* dest);
 void move(byte current_dir, char* src, char* dst);
-void printInt(int x);
+void printReturnCode(char *arg, enum fs_retcode return_code);

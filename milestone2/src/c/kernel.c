@@ -273,7 +273,6 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
     }
 }
          
-
 void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     struct node_filesystem   node_fs_buffer;
     struct sector_filesystem sector_fs_buffer;
@@ -532,7 +531,6 @@ void changeDirectory(char *current_dir, char* arg) {
 }
 
 void makeDirectory(byte current_dir, char* arg) {
-    struct node_filesystem  node_fs_buffer;
     struct file_metadata*   metadata;
     enum   fs_retcode       return_code;
     int    i;
@@ -542,28 +540,25 @@ void makeDirectory(byte current_dir, char* arg) {
     metadata->filesize = 0;
 
     write(metadata, &return_code);
+    if (return_code != FS_SUCCESS){
+        printReturnCode(arg, return_code);
+    }else{
+        clear(metadata->buffer, div(metadata->filesize, 512));
+        clear(metadata->node_name, strlen(metadata->node_name));
+    }
 }
 
 void cat(byte current_dir, char* arg2){
-    struct node_filesystem  node_fs_buffer;
     struct file_metadata*   src;
     enum   fs_retcode       return_code;
-    int    i;
-    
-
     
     strcpy(src->node_name, arg2);
     src->parent_index = current_dir;
     src->filesize = 0;
 
     read(src, &return_code);
-    
-    if (return_code == FS_R_NODE_NOT_FOUND){
-        printString("No such file or directory\r\n");
-    }
-    else if (return_code == FS_R_TYPE_IS_FOLDER){
-        printString(arg2);
-        printString(" is a directory\r\n");
+    if (return_code != FS_SUCCESS){
+        printReturnCode(arg2, return_code);
     }
     else{
         printFileContent(src->buffer);
@@ -574,7 +569,6 @@ void cat(byte current_dir, char* arg2){
 }
 
 void cp(byte current_dir, char* src, char* dest) {
-    struct node_filesystem  node_fs_buffer;
     struct file_metadata    *srcFile, *dstFile;
     enum   fs_retcode       return_code;
     int    i;
@@ -585,20 +579,22 @@ void cp(byte current_dir, char* src, char* dest) {
     srcFile->filesize = 0;
 
     read(srcFile, &return_code);
-    if (return_code == FS_R_NODE_NOT_FOUND) {
-        printString("No such file or directory\r\n");
-    } else if (return_code == FS_R_TYPE_IS_FOLDER) {
-        printString(src);
-        printString(" is a directory\r\n");
+    if (return_code != FS_SUCCESS){
+        printReturnCode(src, return_code);
     } else {
         strcpy(dstFile->node_name, dest);
         dstFile->parent_index = srcFile->parent_index;
         dstFile->filesize = srcFile->filesize;
         strcpy(dstFile->buffer, srcFile->buffer);
 
-        // printFileContent(dstFile->buffer);
         write(dstFile, &return_code);
+        if (return_code != FS_SUCCESS){
+            printReturnCode(src, return_code);
+        }
+        clear(dstFile->buffer, div(dstFile->filesize, 512));
     }
+
+    clear(srcFile->buffer, div(srcFile->filesize, 512));
 }
 
 void move(byte current_dir, char* src, char* dst) {
@@ -843,4 +839,40 @@ void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size) {
     argv[(*argc) * size + j] = '\0';
 
     (*argc)++;
+}
+
+void printReturnCode(char *arg, enum fs_retcode return_code){
+    switch (return_code)
+    {
+    case FS_R_NODE_NOT_FOUND:
+        printString("No such file or directory\r\n");
+        break;
+    case FS_R_TYPE_IS_FOLDER:
+        printString(arg);
+        printString(" is a directory\r\n");
+        break;
+
+    case FS_W_FILE_ALREADY_EXIST:
+        printString("File already exist\r\n");
+        break;
+
+    case FS_W_NOT_ENOUGH_STORAGE:
+        printString("Not Enough storage\r\n");
+        break;
+
+    case FS_W_MAXIMUM_NODE_ENTRY:
+        printString("Maximum Node Entry\r\n");
+        break;
+
+    case FS_W_MAXIMUM_SECTOR_ENTRY:
+        printString("Maximum Sector Entry\r\n");
+        break;
+
+     case FS_W_INVALID_FOLDER:
+        printString("Invalid Folder\r\n");
+        break;
+
+    default:
+        break;
+    }
 }
