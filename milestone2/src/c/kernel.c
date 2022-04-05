@@ -620,7 +620,7 @@ void move(byte current_dir, char* src, char* dst) {
     }
 
     if (!found) {
-        printString("No file or Folder found\r\n");
+        printReturnCode(*src,  FS_R_NODE_NOT_FOUND);
         return;
     }
 
@@ -652,7 +652,7 @@ void move(byte current_dir, char* src, char* dst) {
         }
 
         if (found) {
-            printString("File or folder already exist\r\n");
+            printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
             return;
         }
 
@@ -690,7 +690,7 @@ void move(byte current_dir, char* src, char* dst) {
         }
 
         if (found) {
-            printString("File or folder already exist\r\n");
+            printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
             return;
         }
 
@@ -727,7 +727,7 @@ void move(byte current_dir, char* src, char* dst) {
             } else {
                 // kala arg3 ada , file
                 // tolak
-                printString("File or folder already exist\r\n");
+                printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
                 return;
             }
         } else {
