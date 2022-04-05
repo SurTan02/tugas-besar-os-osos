@@ -21,14 +21,7 @@ int main() {
 	printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
 	printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
 
-    
-
-    printString("seribu >>");
-    printInt(1000);
-    printString("\r\nsatu dua tiga >>");
-    printInt(123);
-    printString("\r\n");
-       
+   
     // printString("SELAMAT DATANG DI osOS!\r\n");
     // printString("TULISKAN NAMA ANDA : ");
 	// readString(buf);
@@ -267,11 +260,13 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             // 6. Lompat ke iterasi selanjutnya hingga iterasi selesai
             // 7. Tulis retcode FS_SUCCESS pada akhir proses pembacaan.
             i = 0;
-            metadata->buffer = buf;
+            strcpy(metadata->buffer, buf);
             while (sector_entry_buffer.sector_numbers[i] != 0x0 && i < 16) {
-                readSector(metadata->buffer+i*512, sector_entry_buffer.sector_numbers[i]);
+                readSector(buf+i*512, sector_entry_buffer.sector_numbers[i]);
                 i++;
             }
+            strcpy(metadata->buffer, buf);
+            clear(buf, i*512);
             metadata->filesize = i * 512;
             *return_code = FS_SUCCESS;
         }
@@ -287,12 +282,13 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	struct sector_entry      sector_entry_buffer;
     int                      i, j, available;
     int                      node_idx, sector_idx;
-    bool                     found, flag;
+    bool                     found;
 
     // Tambahkan tipe data yang dibutuhkan
     
 	// Pembacaan storage ke buffer
 	readSector(&sector_fs_buffer, FS_SECTOR_SECTOR_NUMBER); 
+	readSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER); 
 	readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
 	readSector(&(node_fs_buffer.nodes[32]) , FS_NODE_SECTOR_NUMBER + 1);    
     
@@ -367,23 +363,6 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
         *return_code = FS_W_NOT_ENOUGH_STORAGE;
         return;
     }
-    // File size <= 8192, cari sector yang masih kosong 
-    // i = 16;
-    // found = false;
-    // while  (i < 256 && !found){
-    //     if (!map_fs_buffer.is_filled[i]){
-    //         j = i;
-    //         while ((j < 256) && (j < i + div(metadata->filesize, 512))) {
-    //             if (!map_fs_buffer.is_filled[j]) break;
-    //             else j++;
-    //         }
-    //         if (j == i + metadata->filesize - 1) found = true;
-    //         else i = j + 1;
-    //     } else {
-    //         i++;
-    //     }
-    // }
-
 
     // Terdapat sector kosong
     // 5. Cek pada filesystem sector apakah terdapat entry yang masih kosong.
@@ -429,9 +408,9 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
         // sector_entry_buffer
 
         // 6. Lakukan iterasi berikut dengan kondisi perulangan (penulisan belum selesai && i = 0..255)
-        flag = false;
+        found = false;
         i = 0;
-        while (i < 256 && !flag) {
+        while (i < 256 && !found) {
             //    1. Cek apakah map[i] telah terisi atau tidak
             if (map_fs_buffer.is_filled[i]) {
                 //    2. Jika terisi, lanjutkan ke iterasi selanjutnya / continue
@@ -444,11 +423,12 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
                 //    5. Tambah nilai j dengan 1
                 j++;
                 //    6. Lakukan writeSector() dengan file pointer buffer pada metadata 
-                writeSector(metadata->buffer + ((j-1) * 512), i + FS_SECTOR_SECTOR_NUMBER);
+                writeSector(metadata->buffer + ((j-1) * 512), i);
+                // writeSector(metadata->buffer, i);
                 //       dan sektor tujuan i
                 //    7. Jika ukuran file yang telah tertulis lebih besar atau sama dengan
                 //       filesize pada metadata, penulisan selesai
-                if (j * 512 >= metadata->filesize) flag = true;
+                if (j * 512 >= metadata->filesize) found = true;
             }
             i++;
         }
@@ -569,13 +549,12 @@ void cat(byte current_dir, char* arg2){
     struct file_metadata*   src;
     enum   fs_retcode       return_code;
     int    i;
-    char   buf[8192];
+    
 
-    clear(buf, 8192);
+    
     strcpy(src->node_name, arg2);
     src->parent_index = current_dir;
     src->filesize = 0;
-    // src->buffer = buf;
 
     read(src, &return_code);
     
@@ -590,21 +569,22 @@ void cat(byte current_dir, char* arg2){
         printFileContent(src->buffer);
         printString("\r\n");
     }
+
+    clear(src->buffer, div(src->filesize, 512));
 }
 
 void cp(byte current_dir, char* src, char* dest) {
     struct node_filesystem  node_fs_buffer;
-    struct file_metadata*   srcFile, *dstFile;
+    struct file_metadata    *srcFile, *dstFile;
     enum   fs_retcode       return_code;
     int    i;
-    char buf[8192];
+    // char buf[8192];
 
     strcpy(srcFile->node_name, src);
     srcFile->parent_index = current_dir;
     srcFile->filesize = 0;
 
     read(srcFile, &return_code);
-
     if (return_code == FS_R_NODE_NOT_FOUND) {
         printString("No such file or directory\r\n");
     } else if (return_code == FS_R_TYPE_IS_FOLDER) {
@@ -768,8 +748,8 @@ void move(byte current_dir, char* src, char* dst) {
 void shell() {
     // IN PROGRESS
     char input_buf[64];
-    char path_str[128];
-    char argv[4][64];
+    char path_str[1];
+    char argv[4][16];
     int argc;
     byte current_dir = FS_NODE_P_IDX_ROOT;
 
@@ -780,7 +760,7 @@ void shell() {
         printString("$ ");
         readString(input_buf);  
 
-        getArgument(input_buf, &argc, (char *)argv, 4, 64);
+        getArgument(input_buf, &argc, (char *)argv, 4, 16);
 
         if (strcmp(argv[0], "ls")) {
             if (argc != 1) printString("Too many arguments\r\n");
@@ -814,7 +794,7 @@ void shell() {
         }
 
         clear(input_buf, strlen(input_buf));
-        clear(argv, 4 * 64);
+        clear(argv, 4 * 16);
     }
 }
 
