@@ -236,22 +236,15 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
             //    dan masukkan kedalam buffer yang disediakan pada metadata
             // 6. Lompat ke iterasi selanjutnya hingga iterasi selesai
             // 7. Tulis retcode FS_SUCCESS pada akhir proses pembacaan.
-            i = 0;
-            
-            while (sector_entry_buffer.sector_numbers[i] != 0x0 && i < 16) {
-                readSector(buf+i*512, sector_entry_buffer.sector_numbers[i]);
-                i++;
-                
-            }
-            metadata->filesize = i * 512;
 
-            // magic trick, trust 
-            if (metadata->filesize >= 8192) {
-                metadata->buffer = buf;
-            } else { 
-                strcpy(metadata->buffer, buf);
+            for (i = 0; i < 16; i++) {
+                if (sector_entry_buffer.sector_numbers[i] != 0x0) {
+                    readSector(metadata->buffer + (i*512), sector_entry_buffer.sector_numbers[i]);
+                } else {
+                    break;
+                }
             }
-            
+
             metadata->filesize = i * 512;
             *return_code = FS_SUCCESS;
         }
