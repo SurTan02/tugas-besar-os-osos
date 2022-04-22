@@ -9,6 +9,7 @@ diskimage:
 bootloader:
 	nasm src/asm/bootloader.asm -o out/bootloader
 	dd if=out/bootloader of=out/system.img bs=512 count=1 conv=notrunc
+	
 
 kernel:
 	bcc -ansi -c -o out/kernel.o src/c/kernel.c
