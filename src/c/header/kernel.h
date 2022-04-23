@@ -4,6 +4,8 @@
 
 #include "std_datatype.h"
 #include "std_lib.h"
+#include "filesystem.h"
+#include "string.h"
 // #include "util.h"
 
 // Fungsi bawaan

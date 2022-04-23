@@ -5,7 +5,6 @@
 // TODO : Tambahkan implementasi kode C
 
 #include "header/kernel.h"
-#include "header/filesystem.h"
 
 int main() {
 	fillMap();
@@ -75,8 +74,6 @@ void executeProgram(struct file_metadata *metadata, int segment) {
   else
     printString("exec: file not found\r\n");
 }
-
-
 
 void printInt(int x) {
     char string[16];
@@ -812,6 +809,12 @@ void shell() {
             if (argc == 3) cp(current_dir, argv[1], argv[2]);
             else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
             else printReturnCode (argv[0], ARG_TOO_MANY);     
+
+        } else if (strcmp(input_buf, "test")) {
+            struct file_metadata meta;
+            meta.node_name    = "shell";
+            meta.parent_index = 0;
+            executeProgram(&meta, 0x2000);
 
         } else {
             printString("Unknown command\r\n");
