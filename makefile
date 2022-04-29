@@ -18,13 +18,14 @@ kernel:
 
 shell:
 	bcc -ansi -c -o out/shell.o src/c/shell.c
-	ld86 -o out/shell -d out/shell.o out/lib_interrupt.o out/textio.o
+	ld86 -o out/shell -d out/shell.o out/lib_interrupt.o out/textio.o out/fileio.o
 
 stdlib:
 	bcc -ansi -c -o out/std_lib.o src/c/std_lib.c
 
 lib:
 	bcc -ansi -c -o out/textio.o src/c/textio.c
+	bcc -ansi -c -o out/fileio.o src/c/fileio.c
 	bcc -ansi -c -o out/string.o src/c/string.c
 
 lib_interrupt:
