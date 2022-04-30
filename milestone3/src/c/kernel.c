@@ -74,8 +74,6 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
 void executeProgram(struct file_metadata *metadata, int segment, bool *condition) {
   enum fs_retcode fs_ret;
   byte buf[8192];
-  
-    
    
   metadata->buffer = buf;
   read(metadata, &fs_ret);
@@ -471,105 +469,8 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
 
     // 9. Kembalikan retcode FS_SUCCESS
     *return_code = FS_SUCCESS;
-}
-
-void printRec(char* path_str, byte current_dir) {
-    struct node_filesystem node_fs_buffer;
-
-    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
-	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    
-
-    if (node_fs_buffer.nodes[current_dir].parent_node_index == FS_NODE_P_IDX_ROOT) {
-        printString(node_fs_buffer.nodes[current_dir].name);
-        return;
-    } else {
-        printRec(path_str, node_fs_buffer.nodes[current_dir].parent_node_index);
-        printString("/");
-        printString(node_fs_buffer.nodes[current_dir].name);
-    }
 
 }
-
-void printCWD(char* path_str, byte current_dir) {
-    struct node_filesystem node_fs_buffer;
-    int index[64];
-    int i,idx;
-
-    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
-	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    
-
-    printString("~");
-    if (current_dir == FS_NODE_P_IDX_ROOT) { 
-        // do nothing
-    } else {
-        printRec(path_str, current_dir);
-    }
-}
-
-
-// // void shell() {
-//     // IN PROGRESS
-//     char input_buf[64];
-//     char path_str[1];
-//     char argv[4][16];
-//     int argc;
-//     byte current_dir = FS_NODE_P_IDX_ROOT;
-
-//     while (true) {
-//         printString("OS@IF2230:");
-//         printCWD(path_str, current_dir);
-//         printString("$ ");
-//         readString(input_buf);  
-
-//         getArgument(input_buf, &argc, (char *)argv, 4, 16);
-
-//         if (strcmp(argv[0], "ls")) {
-//             if (argc > 2) printReturnCode (argv[0], ARG_TOO_MANY);
-//             // else list(current_dir, argc, argv[1]); 
-
-//         } else if (strcmp(argv[0], "cd")) {
-//             if (argc == 2) changeDirectory(&(current_dir), argv[1]);
-//             else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
-//             else printReturnCode (argv[0], ARG_TOO_MANY);
-
-//         } else if (strcmp(argv[0], "mv")) {
-//             if (argc == 3) move(current_dir, argv[1], argv[2]);
-//             else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
-//             else printReturnCode (argv[0], ARG_TOO_MANY);
-
-//         } else if (strcmp(argv[0], "mkdir")) {
-//             if (argc == 2) makeDirectory(current_dir, argv[1]);
-//             else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
-//             else printReturnCode (argv[0], ARG_TOO_MANY);
-
-//         } else if (strcmp(argv[0], "cat")) {
-//             if (argc == 2) cat(current_dir, argv[1]);
-//             else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
-//             else printReturnCode (argv[0], ARG_TOO_MANY);
-
-//         } else if (strcmp(argv[0], "cp")) {
-//             if (argc == 3) cp(current_dir, argv[1], argv[2]);
-//             else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
-//             else printReturnCode (argv[0], ARG_TOO_MANY);     
-
-//         } else if (strcmp(input_buf, "test")) {
-//             struct message msg;
-//             struct file_metadata meta;
-
-//             msg.current_directory = current_dir;
-//             setMessage(&msg);
-
-//             meta.node_name    = "shell";
-//             meta.parent_index = 0;
-//             executeProgram(&meta, 0x2000);
-
-//         } else {
-//             printString("Unknown command\r\n");
-//         }
-//         clear(input_buf, strlen(input_buf));
-//         clear(argv, 4 * 16);
-//     }
-// }
 
 void fillMap() {
   struct map_filesystem map_fs_buffer;
@@ -593,27 +494,3 @@ void fillMap() {
   writeSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER); 
 }
 
-// void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size) {
-//     int i, j;
-
-//     i = 0; j = 0; (*argc) = 0;
-//     while (input_buf[i] != '\0' && (*argc) < maxArg - 1) {
-//         if (input_buf[i] == ' ') {
-//             argv[(*argc) * size + j] = '\0';
-//             j = 0; (*argc)++;
-//         } else {
-//             argv[(*argc) * size + j] = input_buf[i];
-//             j++;
-//         }
-//         i++;
-//     }
-
-//     while (input_buf[i] != '\0') {
-//         argv[(*argc) * size + j] = input_buf[i];
-//         i++; j++;
-//     }
-
-//     argv[(*argc) * size + j] = '\0';
-
-//     (*argc)++;
-// }
