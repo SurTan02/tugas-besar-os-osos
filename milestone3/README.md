@@ -24,7 +24,7 @@ sudo apt install nasm bcc bin86 bochs bochs-x make
 - Clone repo ini
 ```
 git clone https://github.com/Sister19/tugas-besar-os-osos.git osOS
-cd osOS/milestone-3
+cd osOS/milestone3
 ```
 - Init shell dan TC
 ```
