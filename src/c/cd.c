@@ -12,7 +12,7 @@ int main() {
     changeDirectory(&dir, msg.arg2);
     
     msg.current_directory = dir;
-    
+    setMessage(&msg);
     if (strlen(msg.other) != 0){
         processArgument(&msg, msg.other);
         strcpy(meta.node_name, msg.arg1);
@@ -22,17 +22,14 @@ int main() {
     } else{
         exits();
     }
-
-    setMessage(&msg);
-    exits();
 }
 
 void changeDirectory(char *current_dir, char* arg) {
     struct node_filesystem  node_fs_buffer;
     int i;
 
-    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
-	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    //FILES
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
+	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    
 
     if (strcmp(arg, "/")) {
         *current_dir = FS_NODE_P_IDX_ROOT;

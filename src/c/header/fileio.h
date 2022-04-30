@@ -19,6 +19,6 @@ void executeProgram(struct file_metadata *metadata, int segment);
 
 void printFileContent(char *string);
 
-void printReturnCode(char *arg, enum fs_retcode return_code);
+// void printReturnCode(char *arg, enum fs_retcode return_code);
 
 #endif

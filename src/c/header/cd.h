@@ -6,6 +6,7 @@
 #include "string.h"
 #include "message.h"
 #include "program.h"
+#include "filesystem.h"
 
 void changeDirectory(char *current_dir, char* arg);
 

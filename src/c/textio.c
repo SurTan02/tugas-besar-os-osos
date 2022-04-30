@@ -56,7 +56,6 @@ void parser(char* input_buf, char* output1, char* output2) {
   }
 }
 
-
 void printToInt(int x) {
     char string[16];
     char reverse[16];
@@ -81,4 +80,52 @@ void printToInt(int x) {
     reverse[strlen(string)] = '\0';
 
     puts(reverse);
+}
+
+
+void printReturnCode(char *arg, enum fs_retcode return_code) {
+    
+    switch (return_code)
+    {
+    case FS_R_NODE_NOT_FOUND:
+        puts("No such file or directory\r\n");
+        break;
+    case FS_R_TYPE_IS_FOLDER:
+        puts(arg);
+        puts(" is a directory\r\n");
+        break;
+
+    case FS_W_FILE_ALREADY_EXIST:
+        puts("File already exist\r\n");
+        break;
+
+    case FS_W_NOT_ENOUGH_STORAGE:
+        puts("Not Enough storage\r\n");
+        break;
+
+    case FS_W_MAXIMUM_NODE_ENTRY:
+        puts("Maximum Node Entry\r\n");
+        break;
+
+    case FS_W_MAXIMUM_SECTOR_ENTRY:
+        puts("Maximum Sector Entry\r\n");
+        break;
+
+    case FS_W_INVALID_FOLDER:
+        puts("Invalid Folder\r\n");
+        break;
+
+    case ARG_TOO_MANY:
+        puts(arg);
+        puts(": Too many arguments\r\n");
+        break;
+
+    case ARG_TOO_FEW:
+        puts(arg);
+        puts(": Too few arguments\r\n");
+        break;
+        
+    default:
+        break;
+    }
 }

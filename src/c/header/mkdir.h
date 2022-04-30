@@ -5,6 +5,7 @@
 #include "fileio.h"
 #include "string.h"
 #include "message.h"
+#include "program.h"
 
 void makeDirectory(byte current_dir, char* arg);
 

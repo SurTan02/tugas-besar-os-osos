@@ -2,11 +2,20 @@
 
 int main() {
     struct message msg;
+    struct file_metadata meta;
     getMessage(&msg);
 
     makeDirectory(msg.current_directory, msg.arg2);
-    // exit
-    while(true);
+    
+    if (strlen(msg.other) != 0){
+        processArgument(&msg, msg.other);
+        strcpy(meta.node_name, msg.arg1);
+		meta.parent_index = 0;
+        
+		executeProgram(&meta, msg.next_program_segment);
+    } else{
+        exits();
+    }
 }
 
 void makeDirectory(byte current_dir, char* arg) {

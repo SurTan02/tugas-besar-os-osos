@@ -22,6 +22,6 @@ void printFileContent(char *string) {
     interrupt(0x21, 0x07, string, 0, 0);
 }
 
-void printReturnCode(char *arg, enum fs_retcode return_code) {
-    interrupt(0x21, 0x08, arg, return_code, 0);
-}
+// void printReturnCode(char *arg, enum fs_retcode return_code) {
+//     interrupt(0x21, 0x08, arg, return_code, 0);
+// }
