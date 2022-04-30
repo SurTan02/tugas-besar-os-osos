@@ -5,13 +5,21 @@ int main() {
     struct file_metadata meta;
     getMessage(&msg);
 
-    makeDirectory(msg.current_directory, msg.arg2);
+    if (msg.argc == 2) makeDirectory(msg.current_directory, msg.arg2);
+    else if (msg.argc == 1) printReturnCode (msg.arg1, ARG_TOO_FEW);
+    else printReturnCode (msg.arg1, ARG_TOO_MANY);
     
     if (strlen(msg.other) != 0){
         processArgument(&msg, msg.other);
-        strcpy(meta.node_name, msg.arg1);
-		meta.parent_index = 0;
-        
+        if (msg.arg1[0] == '.' && msg.arg1[1] == '/') {
+			substr(meta.node_name, msg.arg1, 2);
+			meta.parent_index = msg.current_directory;
+
+	    } else {
+		    meta.parent_index = 0;
+		    strcpy(meta.node_name, msg.arg1);
+	    }
+
 		executeProgram(&meta, msg.next_program_segment);
     } else{
         exits();

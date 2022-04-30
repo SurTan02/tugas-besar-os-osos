@@ -11,10 +11,14 @@ void getMessage(struct message *msg){
 void processArgument(struct message *msg, char* argument){
 	char output1[64], output2[64];
 	char argv[4][16];
-	int argc;
+	int argc,i;
 	
 	clear(output1, 64);
 	clear(output2, 64);
+	for (i = 0; i<4; i++){
+		clear(argv[i], 64);
+	}
+	
 
 	// if (getCurrentSegment() == 3000){
 	// 	msg->next_program_segment = 4000;

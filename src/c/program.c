@@ -1,7 +1,16 @@
 #include "header/program.h"
 
 void executeProgram(struct file_metadata *metadata, int segment){
-    interrupt(0x21, 0x06, metadata, segment, 0);
+    // puts(metadata->node_name); puts(" iki nama\r\n");
+    bool flag;
+    interrupt(0x21, 0x06, metadata, segment, &flag);
+    
+    if (!flag){
+        puts("exec: file not found\r\n");
+        exits();
+    }
+        
+    
 }
 
 void exits(){

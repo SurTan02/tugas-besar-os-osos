@@ -5,7 +5,7 @@ int main() {
 	struct file_metadata meta;
 	char path_str[1];
 	char input_buf[64];
-	char temp[64];
+	
 	// char argv[4][16];
 	// int argc;
 	byte current_dir;
@@ -15,6 +15,7 @@ int main() {
 	current_dir = msg.current_directory;
 	
 	while (true){
+		
 		puts("OS@IF2230:");
 		printCWD(path_str, current_dir);
 		puts("$ ");
@@ -23,7 +24,7 @@ int main() {
 		processArgument(&msg, input_buf);
 
 		if (input_buf[0] == '.' && input_buf[1] == '/') {
-			substr(meta.node_name, input_buf, 2);
+			substr(meta.node_name, msg.arg1, 2);
 			meta.parent_index = msg.current_directory;
 		} else {
 			meta.parent_index = 0;

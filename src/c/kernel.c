@@ -7,18 +7,22 @@
 #include "header/kernel.h"
 
 int main() {
+    
 	fillMap();
 	
     makeInterrupt21();
     clearScreen();    
-	// interrupt (0x10, 0x06*256 + 0, 0xB*256, 0, 5*256 + 80);
-	// printString("  ______        _______.  ______        _______.	\r\n");
-	// printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
-	// printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
-	// printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
-	// printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
-	// printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
+    interrupt (0x10, 0x06*256 + 0, 0xC*256, 0, 6*256 + 31);
+	interrupt (0x10, 0x06*256 + 0, 0xB*256, 0, 5*256 + 80);
+	printString("  ______        _______.  ______        _______.	\r\n");
+	printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
+	printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
+	printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
+	printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
+	printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
 
+    
+    printString("Init your shell and press ENTER!"); readString("a");
 	while (true) 
 	{
         // shell();
@@ -30,7 +34,7 @@ int main() {
 
         meta.node_name    = "shell";
         meta.parent_index = 0;
-        executeProgram(&meta, 0x2000);
+        executeProgram(&meta, 0x2000, true);
 	}
 
     return 0;
@@ -57,7 +61,7 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
             write(BX, CX);
             break;
         case 0x6:
-            executeProgram(BX, CX);
+            executeProgram(BX, CX, DX);
             break;
         case 0x7:
             printFileContent(BX);
@@ -67,11 +71,11 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
     }
 }
 
-void executeProgram(struct file_metadata *metadata, int segment) {
-   
+void executeProgram(struct file_metadata *metadata, int segment, bool *condition) {
   enum fs_retcode fs_ret;
   byte buf[8192];
   
+    
    
   metadata->buffer = buf;
   read(metadata, &fs_ret);
@@ -83,10 +87,12 @@ void executeProgram(struct file_metadata *metadata, int segment) {
       else
         putInMemory(segment, i, 0x00);
     }
+    *condition = true;
     launchProgram(segment);
   }
   else
-    printString("exec: file not found\r\n");
+    // printString("exec: file not found\r\n");
+    *condition = false;
 }
 
 void printInt(int x) {
