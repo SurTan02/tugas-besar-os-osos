@@ -82,6 +82,9 @@ void printToInt(int x) {
     puts(reverse);
 }
 
+void printFileContent(char *string) {
+    interrupt(0x21, 0x07, string, 0, 0);
+}
 
 void printReturnCode(char *arg, enum fs_retcode return_code) {
     
@@ -127,5 +130,38 @@ void printReturnCode(char *arg, enum fs_retcode return_code) {
         
     default:
         break;
+    }
+}
+
+void printRec(char* path_str, byte current_dir) {
+    struct node_filesystem node_fs_buffer;
+
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
+	  readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    
+
+    if (node_fs_buffer.nodes[current_dir].parent_node_index == FS_NODE_P_IDX_ROOT) {
+        puts(node_fs_buffer.nodes[current_dir].name);
+        return;
+    } else {
+        printRec(path_str, node_fs_buffer.nodes[current_dir].parent_node_index);
+        puts("/");
+        puts(node_fs_buffer.nodes[current_dir].name);
+    }
+
+}
+
+void printCWD(char* path_str, byte current_dir) {
+    struct node_filesystem node_fs_buffer;
+    int index[64];
+    int i,idx;
+
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
+	  readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    
+
+    puts("~");
+    if (current_dir == FS_NODE_P_IDX_ROOT) { 
+        // do nothing
+    } else {
+        printRec(path_str, current_dir);
     }
 }
