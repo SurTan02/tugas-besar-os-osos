@@ -1,9 +1,0 @@
-UJI READSECTOR
-
-    //Tambah di make file
-        # dd if=message.txt of=out/system.img bs=512 conv=notrunc seek=30
-
-    //Tambah di main
-        char buffer[512];
-	    readSector(buffer, 30);
-	    printString(buffer);
