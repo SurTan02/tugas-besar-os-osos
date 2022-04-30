@@ -236,7 +236,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	struct sector_entry      sector_entry_buffer;
     int    i,j;
     bool   found;
-    char   buf[8192];
+    
     
     
     // clear(buf, 8192);
