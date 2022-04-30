@@ -43,12 +43,20 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
             break;
         case 0x4:
             read(BX, CX);
+            printString("read interrupt called\r\n");
             break;
         case 0x5:
             write(BX, CX);
+            printString("write interrupt called\r\n");
             break;
         case 0x6:
             executeProgram(BX, CX);
+            break;
+        case 0x7:
+            printFileContent(BX);
+            break;
+        case 0x8:
+            printReturnCode(BX, CX);
             break;
         default:
             printString("Invalid Interrupt");
@@ -220,11 +228,12 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
     bool   found;
     char   buf[8192];
     
+    printString("prod read called\r\n");
     // clear(buf, 8192);
 	// Pembacaan storage ke buffer
 	readSector(&sector_fs_buffer, FS_SECTOR_SECTOR_NUMBER); 
-	readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
-	readSector(&(node_fs_buffer.nodes[32]) , FS_NODE_SECTOR_NUMBER + 1);    //FILES
+	readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);       
+	readSector(&(node_fs_buffer.nodes[32]) , FS_NODE_SECTOR_NUMBER + 1);   
 
     // 1. Cari node dengan nama dan lokasi yang sama pada filesystem.
     found = false;
@@ -274,6 +283,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 }
          
 void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
+    
     struct node_filesystem   node_fs_buffer;
     struct sector_filesystem sector_fs_buffer;
     struct map_filesystem    map_fs_buffer;
@@ -284,7 +294,7 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     bool                     found;
 
     // Tambahkan tipe data yang dibutuhkan
-    
+    printString("prod write called\r\n");
 	// Pembacaan storage ke buffer
 	readSector(&sector_fs_buffer, FS_SECTOR_SECTOR_NUMBER); 
 	readSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER); 

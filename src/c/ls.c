@@ -2,14 +2,24 @@
 
 int main() {
     struct message msg;
+    struct file_metadata meta;
+    // int arg1;
     getMessage(&msg);
     
-    puts("DALAM LS");
-    puts(msg.arg1);
-    puts("\r\n");
+    puts("Masuk main ls\r\n");
     
-    list(msg.current_directory, 1, msg.arg2);
+    puts("arg1: "); puts(msg.arg1); puts("\r\n");
+    puts("arg2: "); puts(msg.arg2); puts("\r\n");
+    puts("arg3: "); puts(msg.arg3); puts("\r\n");
+    
+    // arg2 = msg.arg2[0] - '0';
+    list(msg.current_directory, 2, msg.arg2);
     // exit
+     
+    // meta.node_name    = "shell";
+    // meta.parent_index = 0;
+    // executeProgram(&meta, 0x4000);
+    while(true);
 }
 
 
@@ -19,8 +29,10 @@ void list(byte current_dir, int argc, char* arg){
     int i, j;
     bool found;
 
-    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER, current_dir);        
-	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1, current_dir);
+    puts("didalam func list\r\n");
+
+    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
+	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);
     
     
     j = 0;

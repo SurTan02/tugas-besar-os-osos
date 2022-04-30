@@ -7,18 +7,22 @@ int main() {
   char arg3[64];
   struct message msg;
   struct file_metadata meta;
-  strcpy(msg.arg1, "1");
-  strcpy(msg.arg2, "arg ledua");
-  strcpy(msg.arg3, "arg ketiga");
+  strcpy(msg.arg1, "ls");
+  strcpy(msg.arg2, "bin");
+  strcpy(msg.arg3, "");
+
   msg.current_directory = 0xFF;
   *msg.other = input_buf;
   msg.next_program_segment = 5;
+
   while (true){
     // setMessage(&msg, "ls");
-    setMessage(&msg, "ls");
+   
+
+    setMessage(&msg);
     
     // meta.node_name    = "ls";
-    strcpy(meta.node_name, "ls");
+    strcpy(meta.node_name, msg.arg1);
     // puts("SEBELUM EXEC ");
     // puts(msg.arg1);
     // puts("\r\n");
@@ -45,7 +49,7 @@ int main() {
   
   // struct message* msg;
   // struct file_metadata meta;
-  // strcpy(msg->arg1, "1");
+  // strcpy(msg>arg1, "1");
   // strcpy(msg->arg2, "arg ledua");
   // strcpy(msg->arg3, "arg ketiga");
   // msg->current_directory = 0xFF;
