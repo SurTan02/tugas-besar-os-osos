@@ -2,9 +2,13 @@
 
 int main() {
     struct message msg;
-    // getMessage();
-    move(msg.current_directory, msg.arg1, msg.arg2);
+
+    getMessage(&msg);
+
+    move(msg.current_directory, 2, msg.arg1);
     // exit
+
+    exits();
 }
 
 void move(byte current_dir, char* src, char* dst) {

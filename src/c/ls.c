@@ -2,24 +2,26 @@
 
 int main() {
     struct message msg;
-    struct file_metadata meta;
+    int count;
+   
     // int arg1;
     getMessage(&msg);
     
-    puts("Masuk main ls\r\n");
-    
-    puts("arg1: "); puts(msg.arg1); puts("\r\n");
-    puts("arg2: "); puts(msg.arg2); puts("\r\n");
-    puts("arg3: "); puts(msg.arg3); puts("\r\n");
-    
-    // arg2 = msg.arg2[0] - '0';
-    list(msg.current_directory, 2, msg.arg2);
+    // util lain sama tambahin count??
+    //gaperlu, ok, 
+    //tar count disini mau gw hapus juga
+    // woghey
+
+    count = 1;
+       if (!strcmp(msg.arg2,"")){
+        count = 2;
+    }
+    list(msg.current_directory, count, msg.arg2);
     // exit
-     
-    // meta.node_name    = "shell";
-    // meta.parent_index = 0;
-    // executeProgram(&meta, 0x4000);
-    while(true);
+    if (!strcmp(msg.other, "")){
+        
+    }
+    exits();
 }
 
 
@@ -52,7 +54,7 @@ void list(byte current_dir, int argc, char* arg){
         }
 
         if (!found) {
-            // printReturnCode(arg, FS_R_NODE_NOT_FOUND);
+            printReturnCode(arg, FS_R_NODE_NOT_FOUND);
             return;
         }
     } else {

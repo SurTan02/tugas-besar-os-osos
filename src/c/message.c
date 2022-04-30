@@ -42,11 +42,6 @@ void setMessage(struct message *msg){
 
 	// metadata->buffer = msg;
 	
-	metadata->node_name    = "message";
-	metadata->filesize     = 8192;
-	metadata->parent_index = 0xFF;
-	// puts
-	
 	// write(metadata, &retcode);
 	// read(&metadata, &retcode);
 	writeSector(msg, 0x104);
@@ -56,9 +51,6 @@ void getMessage(struct message *msg){
 	struct file_metadata *metadata;
 	enum fs_retcode  retcode;
 	int i = 0;
-
-	metadata->parent_index =0xFF;
-	metadata->node_name = "message";
 	// strcpy(metadata->node_name, "message");
 
 	// read(metadata, &retcode);

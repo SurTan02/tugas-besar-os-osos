@@ -6,6 +6,7 @@
 #include "string.h"
 #include "message.h"
 #include "std_lib.h"
+#include "program.h"
 
 void list(byte current_dir, int argc, char* arg);
 

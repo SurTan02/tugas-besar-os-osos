@@ -2,9 +2,13 @@
 
 int main() {
     struct message msg;
-    // getMessage();
-    cp(msg.current_directory, msg.arg1, msg.arg2);
+
+    getMessage(&msg);
+
+    cp(msg.current_directory, 2, msg.arg1);
     // exit
+
+    exits();
 }
 
 void cp(byte current_dir, char* src, char* dest) {

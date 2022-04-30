@@ -1,10 +1,18 @@
 #include "header/cat.h"
 
+// buka ls.c
+//setiap main() utility, bikin mirip kek ls, OK?
+// gk mau
+
 int main() {
     struct message msg;
-    // getMessage();
-    cat(msg.current_directory, msg.arg1);
+    getMessage(&msg);
+    puts(msg.arg2);
+    cat(msg.current_directory, msg.arg2);
     // exit
+
+    exits();
+    
 }
 
 void cat(byte current_dir, char* arg2){
@@ -21,8 +29,20 @@ void cat(byte current_dir, char* arg2){
     }
     else{
         printFileContent(src->buffer);
-        printString("\r\n");
+        puts("\r\n");
     }
 
     // clear(src->buffer, src->filesize);
 }
+
+// void printFileContent(char *string) {
+// 	while (*string != '\0')
+// 	{
+//         if (*string == '\n') {
+//             puts('\r');
+//         }
+        		
+//         puts(string);
+//         string++;
+// 	}
+// }

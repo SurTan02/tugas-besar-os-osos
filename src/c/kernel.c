@@ -22,6 +22,10 @@ int main() {
 	while (true) 
 	{
         shell();
+        // struct file_metadata meta;
+        //     meta.node_name    = "shell";
+        //     meta.parent_index = 0;
+        //     executeProgram(&meta, 0x2000);
 	}
 
     return 0;
@@ -228,7 +232,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
     bool   found;
     char   buf[8192];
     
-    printString("prod read called\r\n");
+    
     // clear(buf, 8192);
 	// Pembacaan storage ke buffer
 	readSector(&sector_fs_buffer, FS_SECTOR_SECTOR_NUMBER); 
@@ -294,7 +298,7 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
     bool                     found;
 
     // Tambahkan tipe data yang dibutuhkan
-    printString("prod write called\r\n");
+    
 	// Pembacaan storage ke buffer
 	readSector(&sector_fs_buffer, FS_SECTOR_SECTOR_NUMBER); 
 	readSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER); 

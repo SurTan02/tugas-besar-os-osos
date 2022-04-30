@@ -6,5 +6,6 @@
 #include "fileio.h"
 #include "message.h"
 #include "string.h"
+#include "program.h"
 
 #endif
