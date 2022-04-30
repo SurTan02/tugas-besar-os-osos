@@ -29,3 +29,15 @@ void strcpy(char *dst, char *src)
 {
     while((*dst++=*src++) != '\0');
 }
+
+void substr(char *dst, char *src, int i)
+// Melakukan penyalian substring dari i hingga EOF
+{
+    int j;
+    j = 0;
+    while (src[i] != '\0') {
+        dst[j] = src[i];
+        i++; j++;
+    }
+    dst[j] = '\0';
+}
