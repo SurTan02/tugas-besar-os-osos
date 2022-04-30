@@ -825,7 +825,12 @@ void shell() {
             else printReturnCode (argv[0], ARG_TOO_MANY);     
 
         } else if (strcmp(input_buf, "test")) {
+            struct message msg;
             struct file_metadata meta;
+
+            msg.current_directory = current_dir;
+            setMessage(&msg);
+
             meta.node_name    = "shell";
             meta.parent_index = 0;
             executeProgram(&meta, 0x2000);
@@ -860,30 +865,30 @@ void fillMap() {
   writeSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER); 
 }
 
-void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size) {
-    int i, j;
+// void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size) {
+//     int i, j;
 
-    i = 0; j = 0; (*argc) = 0;
-    while (input_buf[i] != '\0' && (*argc) < maxArg - 1) {
-        if (input_buf[i] == ' ') {
-            argv[(*argc) * size + j] = '\0';
-            j = 0; (*argc)++;
-        } else {
-            argv[(*argc) * size + j] = input_buf[i];
-            j++;
-        }
-        i++;
-    }
+//     i = 0; j = 0; (*argc) = 0;
+//     while (input_buf[i] != '\0' && (*argc) < maxArg - 1) {
+//         if (input_buf[i] == ' ') {
+//             argv[(*argc) * size + j] = '\0';
+//             j = 0; (*argc)++;
+//         } else {
+//             argv[(*argc) * size + j] = input_buf[i];
+//             j++;
+//         }
+//         i++;
+//     }
 
-    while (input_buf[i] != '\0') {
-        argv[(*argc) * size + j] = input_buf[i];
-        i++; j++;
-    }
+//     while (input_buf[i] != '\0') {
+//         argv[(*argc) * size + j] = input_buf[i];
+//         i++; j++;
+//     }
 
-    argv[(*argc) * size + j] = '\0';
+//     argv[(*argc) * size + j] = '\0';
 
-    (*argc)++;
-}
+//     (*argc)++;
+// }
 
 void printReturnCode(char *arg, enum fs_retcode return_code) {
     switch (return_code)

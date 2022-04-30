@@ -2,29 +2,12 @@
 
 int main() {
     struct message msg;
-    int count;
-   
-    // int arg1;
     getMessage(&msg);
     
-    // util lain sama tambahin count??
-    //gaperlu, ok, 
-    //tar count disini mau gw hapus juga
-    // woghey
-
-    count = 1;
-       if (!strcmp(msg.arg2,"")){
-        count = 2;
-    }
-    list(msg.current_directory, count, msg.arg2);
-    // exit
-    if (!strcmp(msg.other, "")){
-        
-    }
-    exits();
+    list(msg.current_directory, msg.argc, msg.arg2);
+    
+    while(true);
 }
-
-
 
 void list(byte current_dir, int argc, char* arg){
     struct node_filesystem node_fs_buffer;

@@ -2,10 +2,12 @@
 
 int main() {
     struct message msg;
-    // getMessage(&msg);
-    changeDirectory(msg.current_directory, msg.arg1);
-    // exit
-    exit();
+    getMessage(&msg);
+    
+    changeDirectory(msg.current_directory, msg.arg2);
+    
+    setMessage(&msg);
+    while(true);
 }
 
 void changeDirectory(char *current_dir, char* arg) {
