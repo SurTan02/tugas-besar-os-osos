@@ -2,27 +2,12 @@
 
 int main() {
     struct message msg;
-    struct file_metadata meta;
-    // int arg1;
     getMessage(&msg);
     
-    puts("Masuk main ls\r\n");
+    list(msg.current_directory, msg.argc, msg.arg2);
     
-    puts("arg1: "); puts(msg.arg1); puts("\r\n");
-    puts("arg2: "); puts(msg.arg2); puts("\r\n");
-    puts("arg3: "); puts(msg.arg3); puts("\r\n");
-    
-    // arg2 = msg.arg2[0] - '0';
-    list(msg.current_directory, 2, msg.arg2);
-    // exit
-     
-    // meta.node_name    = "shell";
-    // meta.parent_index = 0;
-    // executeProgram(&meta, 0x4000);
     while(true);
 }
-
-
 
 void list(byte current_dir, int argc, char* arg){
     struct node_filesystem node_fs_buffer;

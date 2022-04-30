@@ -5,6 +5,8 @@
 #include "std_lib.h"
 #include "filesystem.h"
 #include "string.h"
+#include "message.h"
+#include "textio.h"
 // #include "util.h"
 
 // Fungsi bawaan
@@ -37,7 +39,7 @@ void printRec(char* path_str, byte current_dir);
 void printCWD(char* path_str, byte current_dir);
 void shell();
 void fillMap();
-void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size);
+// void getArgument(char* input_buf, int *argc, char* argv, int maxArg, int size);
 void list(char current_dir, int argc, char* arg);
 void changeDirectory(char dst, char current_dir);
 void makeDirectory(byte current_dir, char* arg);

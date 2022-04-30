@@ -1,6 +1,6 @@
 
 # Makefile
-all: diskimage bootloader lib_interrupt stdlib lib kernel shell ls
+all: diskimage bootloader lib_interrupt stdlib lib kernel shell ls cd mkdir mv cp
 
 # Recipes
 diskimage:
@@ -13,7 +13,7 @@ bootloader:
 kernel:
 	bcc -ansi -c -o out/kernel.o src/c/kernel.c
 	nasm -f as86 src/asm/kernel.asm -o out/kernel_asm.o
-	ld86 -o out/kernel -d out/kernel.o out/std_lib.o out/kernel_asm.o out/lib_interrupt.o out/string.o
+	ld86 -o out/kernel -d out/kernel.o out/std_lib.o out/kernel_asm.o out/lib_interrupt.o out/string.o out/message.o out/textio.o
 	dd if=out/kernel of=out/system.img bs=512 conv=notrunc seek=1
 
 shell:
@@ -39,6 +39,23 @@ utility:
 ls:
 	bcc -ansi -c -o out/ls.o src/c/ls.c
 	ld86 -o out/ls -d out/ls.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o
+
+cd:
+	bcc -ansi -c -o out/cd.o src/c/cd.c
+	ld86 -o out/cd -d out/cd.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o
+
+mkdir:
+	bcc -ansi -c -o out/mkdir.o src/c/mkdir.c
+	ld86 -o out/mkdir -d out/mkdir.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o
+
+mv:
+	bcc -ansi -c -o out/mv.o src/c/mv.c
+	ld86 -o out/mv -d out/mv.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o
+
+cp:
+	bcc -ansi -c -o out/cp.o src/c/cp.c
+	ld86 -o out/cp -d out/cp.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o
+
 
 lib_interrupt:
 	nasm -f as86 src/asm/interrupt.asm -o out/lib_interrupt.o

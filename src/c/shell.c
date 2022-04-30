@@ -1,87 +1,41 @@
 #include "header/shell.h"
 
 int main() {
-  char input_buf[64];
-  char arg1[64];
-  char arg2[64];
-  char arg3[64];
   struct message msg;
   struct file_metadata meta;
-  strcpy(msg.arg1, "ls");
-  strcpy(msg.arg2, "bin");
-  strcpy(msg.arg3, "");
 
-  msg.current_directory = 0xFF;
-  *msg.other = input_buf;
-  msg.next_program_segment = 5;
+  char input_buf[64], output1[64], output2[64];
+  char argv[4][16];
+  int argc;
+  byte current_dir;
 
-  while (true){
-    // setMessage(&msg, "ls");
-   
+  getMessage(&msg);
 
-    setMessage(&msg);
-    
-    // meta.node_name    = "ls";
-    strcpy(meta.node_name, msg.arg1);
-    // puts("SEBELUM EXEC ");
-    // puts(msg.arg1);
-    // puts("\r\n");
-    meta.parent_index = 0;
-    executeProgram(&meta, 0x3000);
-    
+  current_dir = msg.current_directory;
+ 
+  puts("OS@IF2230:");
+  // printCWD
+  puts("$ ");
+  gets(input_buf);
+
+  while (true) {
     gets(input_buf);
-    
-
-    // setMessage(&input_buf, 0xFF);
-    
-    
-    // getMessage(&msg);
-    
-    // puts(msg.arg1);
-    // puts("\n\r");
-    // puts(msg.arg2);
-    // puts("\n\r");
-    // puts(msg.arg3);
-    // // puts(input_buf);
-    // puts("\n\r");
-    // gets(input_buf);
+    parser(input_buf, output1, output2);
+    puts(output1); puts("\r\n");
+    puts(output2); puts("\r\n");
   }
-  
-  // struct message* msg;
-  // struct file_metadata meta;
-  // strcpy(msg>arg1, "1");
-  // strcpy(msg->arg2, "arg ledua");
-  // strcpy(msg->arg3, "arg ketiga");
-  // msg->current_directory = 0xFF;
-  // // *msg.other = input_buf;
-  // msg->next_program_segment = 5;
-  // while (true){
-  //   setMessage(msg, "ls");
-    
-  //   // meta.node_name    = "ls";
-  //   strcpy(meta.node_name, msg->arg1);
-  //   puts("SEBELUM EXEC ");
-  //   puts(msg->arg1);
-  //   puts("\r\n");
-  //   meta.parent_index = 0;
-  //   executeProgram(&meta, 0x3000);
-    
-  //   gets(input_buf);
-    
 
-  //   // setMessage(&input_buf, 0xFF);
-    
-    
-  //   // getMessage(&msg);
-    
-  //   // puts(msg.arg1);
-  //   // puts("\n\r");
-  //   // puts(msg.arg2);
-  //   // puts("\n\r");
-  //   // puts(msg.arg3);
-  //   // // puts(input_buf);
-  //   // puts("\n\r");
-  //   // gets(input_buf);
-  // }
-  
+  getArgument(input_buf, &argc, (char *)argv, 4, 16);
+
+  strcpy(msg.arg1, argv[0]);
+  strcpy(msg.arg2, argv[1]);
+  strcpy(msg.arg3, argv[2]);
+  strcpy(msg.other, argv[4]);
+
+  msg.argc = argc;
+  setMessage(&msg);
+
+  strcpy(meta.node_name, argv[0]);
+  meta.parent_index = 0;
+  executeProgram(&meta, 3000);
 }

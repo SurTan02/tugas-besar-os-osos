@@ -2,9 +2,11 @@
 
 int main() {
     struct message msg;
-    // getMessage();
-    makeDirectory(msg.current_directory, msg.arg1);
+    getMessage(&msg);
+
+    makeDirectory(msg.current_directory, msg.arg2);
     // exit
+    while(true);
 }
 
 void makeDirectory(byte current_dir, char* arg) {
