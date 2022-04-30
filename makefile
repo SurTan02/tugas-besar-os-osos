@@ -54,15 +54,15 @@ cd:
 
 mkdir:
 	bcc -ansi -c -o out/mkdir.o src/c/mkdir.c
-	ld86 -o out/mkdir -d out/mkdir.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o out/utils_asm.o
+	ld86 -o out/mkdir -d out/mkdir.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o out/utils_asm.o out/program.o
 
 mv:
 	bcc -ansi -c -o out/mv.o src/c/mv.c
-	ld86 -o out/mv -d out/mv.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o out/utils_asm.o
+	ld86 -o out/mv -d out/mv.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o out/utils_asm.o out/program.o
 
 cp:
 	bcc -ansi -c -o out/cp.o src/c/cp.c
-	ld86 -o out/cp -d out/cp.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o out/utils_asm.o
+	ld86 -o out/cp -d out/cp.o out/lib_interrupt.o out/textio.o out/fileio.o out/message.o out/string.o out/std_lib.o out/utils_asm.o out/program.o
 
 
 lib_interrupt:
