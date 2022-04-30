@@ -11,21 +11,26 @@ int main() {
 	
     makeInterrupt21();
     clearScreen();    
-	interrupt (0x10, 0x06*256 + 0, 0xB*256, 0, 5*256 + 80);
-	printString("  ______        _______.  ______        _______.	\r\n");
-	printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
-	printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
-	printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
-	printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
-	printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
+	// interrupt (0x10, 0x06*256 + 0, 0xB*256, 0, 5*256 + 80);
+	// printString("  ______        _______.  ______        _______.	\r\n");
+	// printString(" /  __  \\      /       | /  __  \\      /       | \r\n");
+	// printString("|  |  |  |    |   (----`|  |  |  |    |   (----`	\r\n");
+	// printString("|  |  |  |     \\   \\    |  |  |  |    \\   \\   	\r\n");
+	// printString("|  `--'  | .----)   |   |  `--'  | .----)   |   	\r\n");
+	// printString(" \\______/  |_______/     \\______/  |_______/    	\r\n");
 
 	while (true) 
 	{
-        shell();
-        // struct file_metadata meta;
-        //     meta.node_name    = "shell";
-        //     meta.parent_index = 0;
-        //     executeProgram(&meta, 0x2000);
+        // shell();
+        struct message msg;
+        struct file_metadata meta;
+
+        msg.current_directory = 0xFF;
+        setMessage(&msg);
+
+        meta.node_name    = "shell";
+        meta.parent_index = 0;
+        executeProgram(&meta, 0x2000);
 	}
 
     return 0;
@@ -68,9 +73,11 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
 }
 
 void executeProgram(struct file_metadata *metadata, int segment) {
+   
   enum fs_retcode fs_ret;
   byte buf[8192];
   
+   
   metadata->buffer = buf;
   read(metadata, &fs_ret);
   if (fs_ret == FS_SUCCESS) {
@@ -498,350 +505,350 @@ void printCWD(char* path_str, byte current_dir) {
     }
 }
 
-void list(byte current_dir, int argc, char* arg){
-    struct node_filesystem  node_fs_buffer;
-    int i, j;
-    bool found;
+// void list(byte current_dir, int argc, char* arg){
+//     struct node_filesystem  node_fs_buffer;
+//     int i, j;
+//     bool found;
 
-    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
-	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);
+//     readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
+// 	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);
 
-    j = 0;
-    if (argc == 2) {
-        i = 0;
-        found = false;
-        while (i < 64 && !found) {
-            // = tidak sama dengan ==
-            if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
-            strcmp(node_fs_buffer.nodes[i].name, arg) &&
-            node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
-                found = true;
-                j = i;
-            } else {
-                i++;
-            }
-        }
+//     j = 0;
+//     if (argc == 2) {
+//         i = 0;
+//         found = false;
+//         while (i < 64 && !found) {
+//             // = tidak sama dengan ==
+//             if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
+//             strcmp(node_fs_buffer.nodes[i].name, arg) &&
+//             node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
+//                 found = true;
+//                 j = i;
+//             } else {
+//                 i++;
+//             }
+//         }
 
-        if (!found) {
-            printReturnCode(arg, FS_R_NODE_NOT_FOUND);
-            return;
-        }
-    } else {
-        j = current_dir;
-    }   
+//         if (!found) {
+//             printReturnCode(arg, FS_R_NODE_NOT_FOUND);
+//             return;
+//         }
+//     } else {
+//         j = current_dir;
+//     }   
 
-    for (i = 0 ; i < 64 ; i++) {
-        if (node_fs_buffer.nodes[i].parent_node_index == j && !strcmp(node_fs_buffer.nodes[i].name,"")){
-            printString(node_fs_buffer.nodes[i].name);
-            if (node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
-                printString("/");
-            }
-            printString("\r\n");
-        }
-    }
-}
+//     for (i = 0 ; i < 64 ; i++) {
+//         if (node_fs_buffer.nodes[i].parent_node_index == j && !strcmp(node_fs_buffer.nodes[i].name,"")){
+//             printString(node_fs_buffer.nodes[i].name);
+//             if (node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
+//                 printString("/");
+//             }
+//             printString("\r\n");
+//         }
+//     }
+// }
 
-void changeDirectory(char *current_dir, char* arg) {
-    struct node_filesystem  node_fs_buffer;
-    int i;
+// void changeDirectory(char *current_dir, char* arg) {
+//     struct node_filesystem  node_fs_buffer;
+//     int i;
 
-    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
-	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    //FILES
+//     readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        //directory
+// 	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);    //FILES
 
-    if (strcmp(arg, "/")) {
-        *current_dir = FS_NODE_P_IDX_ROOT;
-        return;
-    }
+//     if (strcmp(arg, "/")) {
+//         *current_dir = FS_NODE_P_IDX_ROOT;
+//         return;
+//     }
     
-    if (strcmp(arg, "..")) {
-        if (*current_dir != FS_NODE_P_IDX_ROOT){
-            *current_dir = node_fs_buffer.nodes[*current_dir].parent_node_index;
-            return;
-        }
-    }
+//     if (strcmp(arg, "..")) {
+//         if (*current_dir != FS_NODE_P_IDX_ROOT){
+//             *current_dir = node_fs_buffer.nodes[*current_dir].parent_node_index;
+//             return;
+//         }
+//     }
 
-    for (i = 0; i < 64; i++) {
-        if (node_fs_buffer.nodes[i].parent_node_index == *current_dir && 
-            strcmp(arg, node_fs_buffer.nodes[i].name) && 
-            node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
-                *current_dir = i;
-                return;
-        }
-    }
+//     for (i = 0; i < 64; i++) {
+//         if (node_fs_buffer.nodes[i].parent_node_index == *current_dir && 
+//             strcmp(arg, node_fs_buffer.nodes[i].name) && 
+//             node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER) {
+//                 *current_dir = i;
+//                 return;
+//         }
+//     }
     
-    printReturnCode(arg, FS_R_NODE_NOT_FOUND);
-}
+//     printReturnCode(arg, FS_R_NODE_NOT_FOUND);
+// }
 
-void makeDirectory(byte current_dir, char* arg) {
-    struct file_metadata*   metadata;
-    enum   fs_retcode       return_code;
-    int    i;
+// void makeDirectory(byte current_dir, char* arg) {
+//     struct file_metadata*   metadata;
+//     enum   fs_retcode       return_code;
+//     int    i;
 
-    strcpy(metadata->node_name, arg);
-    metadata->parent_index = current_dir;
-    metadata->filesize = 0;
+//     strcpy(metadata->node_name, arg);
+//     metadata->parent_index = current_dir;
+//     metadata->filesize = 0;
 
-    write(metadata, &return_code);
-    if (return_code != FS_SUCCESS){
-        printReturnCode(arg, return_code);
-    }else{
-        clear(metadata->buffer, metadata->filesize);
-        clear(metadata->node_name, strlen(metadata->node_name));
-    }
-}
+//     write(metadata, &return_code);
+//     if (return_code != FS_SUCCESS){
+//         printReturnCode(arg, return_code);
+//     }else{
+//         clear(metadata->buffer, metadata->filesize);
+//         clear(metadata->node_name, strlen(metadata->node_name));
+//     }
+// }
 
-void cat(byte current_dir, char* arg2){
-    struct file_metadata*   src;
-    enum   fs_retcode       return_code;
+// void cat(byte current_dir, char* arg2){
+//     struct file_metadata*   src;
+//     enum   fs_retcode       return_code;
     
-    strcpy(src->node_name, arg2);
-    src->parent_index = current_dir;
-    src->filesize = 0;
+//     strcpy(src->node_name, arg2);
+//     src->parent_index = current_dir;
+//     src->filesize = 0;
 
-    read(src, &return_code);
-    if (return_code != FS_SUCCESS){
-        printReturnCode(arg2, return_code);
-    }
-    else{
-        printFileContent(src->buffer);
-        printString("\r\n");
-    }
+//     read(src, &return_code);
+//     if (return_code != FS_SUCCESS){
+//         printReturnCode(arg2, return_code);
+//     }
+//     else{
+//         printFileContent(src->buffer);
+//         printString("\r\n");
+//     }
 
-    // clear(src->buffer, src->filesize);
-}
+//     // clear(src->buffer, src->filesize);
+// }
 
-void cp(byte current_dir, char* src, char* dest) {
-    struct file_metadata*    srcFile;
-    enum   fs_retcode       return_code;
-    int    i;
+// void cp(byte current_dir, char* src, char* dest) {
+//     struct file_metadata*    srcFile;
+//     enum   fs_retcode       return_code;
+//     int    i;
 
-    strcpy(srcFile->node_name, src);
-    srcFile->parent_index = current_dir;
-    srcFile->filesize = 0;
+//     strcpy(srcFile->node_name, src);
+//     srcFile->parent_index = current_dir;
+//     srcFile->filesize = 0;
     
-    read(srcFile, &return_code);
+//     read(srcFile, &return_code);
 
-    if (return_code != FS_SUCCESS){
-        printReturnCode(src, return_code);
-    } else {
-        strcpy(srcFile->node_name, dest);
-        write(srcFile, &return_code);
+//     if (return_code != FS_SUCCESS){
+//         printReturnCode(src, return_code);
+//     } else {
+//         strcpy(srcFile->node_name, dest);
+//         write(srcFile, &return_code);
 
-        if (return_code != FS_SUCCESS){
-            printReturnCode(src, return_code);
-        }
-    }
+//         if (return_code != FS_SUCCESS){
+//             printReturnCode(src, return_code);
+//         }
+//     }
 
-    // clear(srcFile->buffer, srcFile->filesize);
-}
+//     // clear(srcFile->buffer, srcFile->filesize);
+// }
 
-void move(byte current_dir, char* src, char* dst) {
-    struct node_filesystem  node_fs_buffer;
-    int i, idxSrc, parentIdx;
-    bool found, isFolderSrc, isFolderDst;
-    char name[14];
+// void move(byte current_dir, char* src, char* dst) {
+//     struct node_filesystem  node_fs_buffer;
+//     int i, idxSrc, parentIdx;
+//     bool found, isFolderSrc, isFolderDst;
+//     char name[14];
 
-    readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);
-	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);
+//     readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);
+// 	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);
     
-    // cari indeks src
-    found = false;
-    i = 0;
-    while (i < 64 && !found) {
-        if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
-        strcmp(node_fs_buffer.nodes[i].name, src)) {
-            found = true;
-            idxSrc = i;
-        } else {
-            i++;
-        }
-    }
+//     // cari indeks src
+//     found = false;
+//     i = 0;
+//     while (i < 64 && !found) {
+//         if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
+//         strcmp(node_fs_buffer.nodes[i].name, src)) {
+//             found = true;
+//             idxSrc = i;
+//         } else {
+//             i++;
+//         }
+//     }
 
-    if (!found) {
-        printReturnCode(*src,  FS_R_NODE_NOT_FOUND);
-        return;
-    }
+//     if (!found) {
+//         printReturnCode(*src,  FS_R_NODE_NOT_FOUND);
+//         return;
+//     }
 
-    isFolderSrc = node_fs_buffer.nodes[idxSrc].sector_entry_index == FS_NODE_S_IDX_FOLDER;
+//     isFolderSrc = node_fs_buffer.nodes[idxSrc].sector_entry_index == FS_NODE_S_IDX_FOLDER;
 
-    if (dst[0] == '/') {
-        // pindahin ke root
+//     if (dst[0] == '/') {
+//         // pindahin ke root
 
-        // Dapetin nama
-        strcpy(name, dst+1);
+//         // Dapetin nama
+//         strcpy(name, dst+1);
 
-        if (strcmp(name, "")) {
-            printReturnCode(name, FS_R_NODE_NOT_FOUND);
-            return;
-        }
+//         if (strcmp(name, "")) {
+//             printReturnCode(name, FS_R_NODE_NOT_FOUND);
+//             return;
+//         }
         
-        // cek apakah ada file atau folder dengan nama yang sama di root
-        found = false;
-        i = 0;
-        while (i < 64 && !found) {
-            isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
-            if (node_fs_buffer.nodes[i].parent_node_index == FS_NODE_P_IDX_ROOT && 
-            strcmp(node_fs_buffer.nodes[i].name, name) && 
-            isFolderDst == isFolderSrc) {
-                found = true;
-            } else {
-                i++;
-            }
-        }
+//         // cek apakah ada file atau folder dengan nama yang sama di root
+//         found = false;
+//         i = 0;
+//         while (i < 64 && !found) {
+//             isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
+//             if (node_fs_buffer.nodes[i].parent_node_index == FS_NODE_P_IDX_ROOT && 
+//             strcmp(node_fs_buffer.nodes[i].name, name) && 
+//             isFolderDst == isFolderSrc) {
+//                 found = true;
+//             } else {
+//                 i++;
+//             }
+//         }
 
-        if (found) {
-            printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
-            return;
-        }
+//         if (found) {
+//             printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
+//             return;
+//         }
 
-        // change parent index to root index
-        node_fs_buffer.nodes[idxSrc].parent_node_index = FS_NODE_P_IDX_ROOT;
+//         // change parent index to root index
+//         node_fs_buffer.nodes[idxSrc].parent_node_index = FS_NODE_P_IDX_ROOT;
 
-        // change name
-        strcpy(node_fs_buffer.nodes[idxSrc].name, name);
+//         // change name
+//         strcpy(node_fs_buffer.nodes[idxSrc].name, name);
         
-    } else if (dst[0] == '.' && dst[1] == '.' && dst[2] == '/') {
-        // pindahin mundur
+//     } else if (dst[0] == '.' && dst[1] == '.' && dst[2] == '/') {
+//         // pindahin mundur
 
-        // Dapetin nama
-        strcpy(name, dst+3);
+//         // Dapetin nama
+//         strcpy(name, dst+3);
 
-        if (strcmp(name, "")) {
-            printReturnCode(name, FS_R_NODE_NOT_FOUND);
-            return;
-        }
+//         if (strcmp(name, "")) {
+//             printReturnCode(name, FS_R_NODE_NOT_FOUND);
+//             return;
+//         }
 
-        // cek apakah ada file atau folder dengan nama yang sama di direktori
-        parentIdx = node_fs_buffer.nodes[current_dir].parent_node_index;
+//         // cek apakah ada file atau folder dengan nama yang sama di direktori
+//         parentIdx = node_fs_buffer.nodes[current_dir].parent_node_index;
 
-        found = false;
-        i = 0;
-        while (i < 64 && !found) {
-            isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
-            if (node_fs_buffer.nodes[i].parent_node_index == parentIdx && 
-            strcmp(node_fs_buffer.nodes[i].name, name) && 
-            isFolderDst == isFolderSrc) {
-                found = true;
-            } else {
-                i++;
-            }
-        }
+//         found = false;
+//         i = 0;
+//         while (i < 64 && !found) {
+//             isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
+//             if (node_fs_buffer.nodes[i].parent_node_index == parentIdx && 
+//             strcmp(node_fs_buffer.nodes[i].name, name) && 
+//             isFolderDst == isFolderSrc) {
+//                 found = true;
+//             } else {
+//                 i++;
+//             }
+//         }
 
-        if (found) {
-            printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
-            return;
-        }
+//         if (found) {
+//             printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
+//             return;
+//         }
 
-        // change parent index to root index
-        node_fs_buffer.nodes[idxSrc].parent_node_index = parentIdx;
+//         // change parent index to root index
+//         node_fs_buffer.nodes[idxSrc].parent_node_index = parentIdx;
 
-        // change name
-        strcpy(node_fs_buffer.nodes[idxSrc].name, name); 
-    } else {
-        // Pindahin maju ato langsung rename
+//         // change name
+//         strcpy(node_fs_buffer.nodes[idxSrc].name, name); 
+//     } else {
+//         // Pindahin maju ato langsung rename
 
-        // Dapetin nama
-        strcpy(name, dst);
+//         // Dapetin nama
+//         strcpy(name, dst);
 
-        // cari destinasi
-        found = false;
-        i = 0;
-        while (i < 64 && !found) {
-            if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
-            strcmp(node_fs_buffer.nodes[i].name, name)) {
-                found = true;
-            } else {
-                i++;
-            }
-        }
+//         // cari destinasi
+//         found = false;
+//         i = 0;
+//         while (i < 64 && !found) {
+//             if (node_fs_buffer.nodes[i].parent_node_index == current_dir && 
+//             strcmp(node_fs_buffer.nodes[i].name, name)) {
+//                 found = true;
+//             } else {
+//                 i++;
+//             }
+//         }
 
-        if (found) {
-            isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
-            // kalo misalkan arg3 ternyata ada dan merupakan foler"
-            // dia pindahin arg2 ke dalam
-            if (isFolderDst) {
-                // change parent index
-                node_fs_buffer.nodes[idxSrc].parent_node_index = i;
-            } else {
-                // kala arg3 ada , file
-                // tolak
-                printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
-                return;
-            }
-        } else {
-            // kalo arg3 tidak ada
-            // change name
-            strcpy(node_fs_buffer.nodes[idxSrc].name, name);
-        }
-    }
+//         if (found) {
+//             isFolderDst = node_fs_buffer.nodes[i].sector_entry_index == FS_NODE_S_IDX_FOLDER;
+//             // kalo misalkan arg3 ternyata ada dan merupakan foler"
+//             // dia pindahin arg2 ke dalam
+//             if (isFolderDst) {
+//                 // change parent index
+//                 node_fs_buffer.nodes[idxSrc].parent_node_index = i;
+//             } else {
+//                 // kala arg3 ada , file
+//                 // tolak
+//                 printReturnCode(src, FS_W_FILE_ALREADY_EXIST);
+//                 return;
+//             }
+//         } else {
+//             // kalo arg3 tidak ada
+//             // change name
+//             strcpy(node_fs_buffer.nodes[idxSrc].name, name);
+//         }
+//     }
 
-    writeSector(&(node_fs_buffer.nodes[0]), FS_NODE_SECTOR_NUMBER);
-    writeSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
-}
+//     writeSector(&(node_fs_buffer.nodes[0]), FS_NODE_SECTOR_NUMBER);
+//     writeSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+// }
 
-void shell() {
-    // IN PROGRESS
-    char input_buf[64];
-    char path_str[1];
-    char argv[4][16];
-    int argc;
-    byte current_dir = FS_NODE_P_IDX_ROOT;
+// // void shell() {
+//     // IN PROGRESS
+//     char input_buf[64];
+//     char path_str[1];
+//     char argv[4][16];
+//     int argc;
+//     byte current_dir = FS_NODE_P_IDX_ROOT;
 
-    while (true) {
-        printString("OS@IF2230:");
-        printCWD(path_str, current_dir);
-        printString("$ ");
-        readString(input_buf);  
+//     while (true) {
+//         printString("OS@IF2230:");
+//         printCWD(path_str, current_dir);
+//         printString("$ ");
+//         readString(input_buf);  
 
-        getArgument(input_buf, &argc, (char *)argv, 4, 16);
+//         getArgument(input_buf, &argc, (char *)argv, 4, 16);
 
-        if (strcmp(argv[0], "ls")) {
-            if (argc > 2) printReturnCode (argv[0], ARG_TOO_MANY);
-            else list(current_dir, argc, argv[1]); 
+//         if (strcmp(argv[0], "ls")) {
+//             if (argc > 2) printReturnCode (argv[0], ARG_TOO_MANY);
+//             // else list(current_dir, argc, argv[1]); 
 
-        } else if (strcmp(argv[0], "cd")) {
-            if (argc == 2) changeDirectory(&(current_dir), argv[1]);
-            else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
-            else printReturnCode (argv[0], ARG_TOO_MANY);
+//         } else if (strcmp(argv[0], "cd")) {
+//             if (argc == 2) changeDirectory(&(current_dir), argv[1]);
+//             else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
+//             else printReturnCode (argv[0], ARG_TOO_MANY);
 
-        } else if (strcmp(argv[0], "mv")) {
-            if (argc == 3) move(current_dir, argv[1], argv[2]);
-            else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
-            else printReturnCode (argv[0], ARG_TOO_MANY);
+//         } else if (strcmp(argv[0], "mv")) {
+//             if (argc == 3) move(current_dir, argv[1], argv[2]);
+//             else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
+//             else printReturnCode (argv[0], ARG_TOO_MANY);
 
-        } else if (strcmp(argv[0], "mkdir")) {
-            if (argc == 2) makeDirectory(current_dir, argv[1]);
-            else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
-            else printReturnCode (argv[0], ARG_TOO_MANY);
+//         } else if (strcmp(argv[0], "mkdir")) {
+//             if (argc == 2) makeDirectory(current_dir, argv[1]);
+//             else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
+//             else printReturnCode (argv[0], ARG_TOO_MANY);
 
-        } else if (strcmp(argv[0], "cat")) {
-            if (argc == 2) cat(current_dir, argv[1]);
-            else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
-            else printReturnCode (argv[0], ARG_TOO_MANY);
+//         } else if (strcmp(argv[0], "cat")) {
+//             if (argc == 2) cat(current_dir, argv[1]);
+//             else if (argc == 1) printReturnCode (argv[0], ARG_TOO_FEW);
+//             else printReturnCode (argv[0], ARG_TOO_MANY);
 
-        } else if (strcmp(argv[0], "cp")) {
-            if (argc == 3) cp(current_dir, argv[1], argv[2]);
-            else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
-            else printReturnCode (argv[0], ARG_TOO_MANY);     
+//         } else if (strcmp(argv[0], "cp")) {
+//             if (argc == 3) cp(current_dir, argv[1], argv[2]);
+//             else if (argc < 3) printReturnCode (argv[0], ARG_TOO_FEW);
+//             else printReturnCode (argv[0], ARG_TOO_MANY);     
 
-        } else if (strcmp(input_buf, "test")) {
-            struct message msg;
-            struct file_metadata meta;
+//         } else if (strcmp(input_buf, "test")) {
+//             struct message msg;
+//             struct file_metadata meta;
 
-            msg.current_directory = current_dir;
-            setMessage(&msg);
+//             msg.current_directory = current_dir;
+//             setMessage(&msg);
 
-            meta.node_name    = "shell";
-            meta.parent_index = 0;
-            executeProgram(&meta, 0x2000);
+//             meta.node_name    = "shell";
+//             meta.parent_index = 0;
+//             executeProgram(&meta, 0x2000);
 
-        } else {
-            printString("Unknown command\r\n");
-        }
-        clear(input_buf, strlen(input_buf));
-        clear(argv, 4 * 16);
-    }
-}
+//         } else {
+//             printString("Unknown command\r\n");
+//         }
+//         clear(input_buf, strlen(input_buf));
+//         clear(argv, 4 * 16);
+//     }
+// }
 
 void fillMap() {
   struct map_filesystem map_fs_buffer;

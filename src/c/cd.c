@@ -2,12 +2,29 @@
 
 int main() {
     struct message msg;
+    struct file_metadata meta;
+    byte dir;
+    
     getMessage(&msg);
     
-    changeDirectory(msg.current_directory, msg.arg2);
+    dir = msg.current_directory;
     
+    changeDirectory(&dir, msg.arg2);
+    
+    msg.current_directory = dir;
+    
+    if (strlen(msg.other) != 0){
+        processArgument(&msg, msg.other);
+        strcpy(meta.node_name, msg.arg1);
+		meta.parent_index = 0;
+        
+		executeProgram(&meta, msg.next_program_segment);
+    } else{
+        exits();
+    }
+
     setMessage(&msg);
-    while(true);
+    exits();
 }
 
 void changeDirectory(char *current_dir, char* arg) {

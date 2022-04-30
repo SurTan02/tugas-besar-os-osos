@@ -2,19 +2,27 @@
 
 int main() {
     struct message msg;
+    struct file_metadata meta;
+
     getMessage(&msg);
     
     list(msg.current_directory, msg.argc, msg.arg2);
     
-    while(true);
+    if (strlen(msg.other) != 0){
+        processArgument(&msg, msg.other);
+        strcpy(meta.node_name, msg.arg1);
+		meta.parent_index = 0;
+        
+		executeProgram(&meta, msg.next_program_segment);
+    } else{
+        exits();
+    }
 }
 
 void list(byte current_dir, int argc, char* arg){
     struct node_filesystem node_fs_buffer;
     int i, j;
     bool found;
-
-    puts("didalam func list\r\n");
 
     readSector(&(node_fs_buffer.nodes[0]),   FS_NODE_SECTOR_NUMBER);        
 	readSector(&(node_fs_buffer.nodes[32]),  FS_NODE_SECTOR_NUMBER + 1);

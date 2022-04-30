@@ -4,6 +4,8 @@
 #include "std_datatype.h"
 #include "filesystem.h"
 #include "string.h"
+#include "textio.h"
+#include "utils.h"
 
 struct message {
     byte current_directory;
@@ -21,4 +23,6 @@ struct message {
 void setMessage(struct message *msg);
 
 void getMessage(struct message *msg);
+
+void processArgument(struct message *msg, char* argument);
 #endif

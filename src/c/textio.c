@@ -38,11 +38,11 @@ void parser(char* input_buf, char* output1, char* output2) {
   bool kondisi_stop;
   
   i = 0;
-  kondisi_stop = input_buf[0] != ' ' && input_buf[1] != ';' && input_buf[2] != ' ';
-  while (input_buf[i] != '\0') {
+  kondisi_stop = input_buf[0] == ' ' && input_buf[1] == ';' && input_buf[2] == ' ';
+  while (input_buf[i] != '\0' && !kondisi_stop) {
     output1[i] = input_buf[i];
-    kondisi_stop = input_buf[i] != ' ' && input_buf[i + 1] != ';' && input_buf[i + 2] != ' ';
     i++;
+    kondisi_stop = input_buf[i] == ' ' && input_buf[i + 1] == ';' && input_buf[i + 2] == ' ';
   }
   output1[i] = '\0';
 
@@ -54,4 +54,31 @@ void parser(char* input_buf, char* output1, char* output2) {
     }
     output2[j] = '\0';
   }
+}
+
+
+void printToInt(int x) {
+    char string[16];
+    char reverse[16];
+    int i;
+    
+    if (x == 0) {
+        string[0] = x + '0';
+        string[1] = '\0';
+    } else {
+        i = 0;
+        while (x != 0) {
+            string[i] = mod(x, 10) + '0';
+            x = div(x, 10);
+            i++;
+        }
+        string[i] = '\0';
+    }
+
+    for (i = strlen(string) - 1; i > -1; i--) {
+        reverse[strlen(string) - 1 - i] = string[i];
+    }
+    reverse[strlen(string)] = '\0';
+
+    puts(reverse);
 }
