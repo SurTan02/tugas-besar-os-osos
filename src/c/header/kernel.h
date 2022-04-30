@@ -1,6 +1,5 @@
-// Kernel header
-
-
+#ifndef KERNEL_H
+#define KERNEL_H
 
 #include "std_datatype.h"
 #include "std_lib.h"
@@ -46,3 +45,5 @@ void cat(byte current_dir, char* arg2);
 void cp(byte current_dir, char* src, char* dest);
 void move(byte current_dir, char* src, char* dst);
 void printReturnCode(char *arg, enum fs_retcode return_code);
+
+#endif

@@ -1,11 +1,12 @@
-// Filesystem data structure
+#ifndef FILESYSTEM_H
+#define FILESYSTEM_H
+
 
 #include "std_datatype.h"
 
 #define FS_MAP_SECTOR_NUMBER    0x100
 #define FS_NODE_SECTOR_NUMBER   0x101
 #define FS_SECTOR_SECTOR_NUMBER 0x103
-
 #define FS_NODE_P_IDX_ROOT   0xFF
 #define FS_NODE_S_IDX_FOLDER 0xFF
 
@@ -64,3 +65,5 @@ enum fs_retcode {
     ARG_TOO_MANY    = 8,
     ARG_TOO_FEW     = 9
 };
+
+#endif
