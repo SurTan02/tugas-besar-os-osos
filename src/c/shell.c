@@ -3,7 +3,7 @@
 int main() {
 	struct message msg;
 	struct file_metadata meta;
-
+	char path_str[1];
 	char input_buf[64];
 	char temp[64];
 	// char argv[4][16];
@@ -16,9 +16,8 @@ int main() {
 	
 	while (true){
 		puts("OS@IF2230:");
-		// printCWD
+		printCWD(path_str, current_dir);
 		puts("$ ");
-		
 		gets(input_buf);
 
 		processArgument(&msg, input_buf);

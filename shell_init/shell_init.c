@@ -14,7 +14,7 @@ void shell(byte buf[2880][512]) {
     insert_file(buf, "shell", 0);
     insert_file(buf, "cd", 0);
     insert_file(buf, "mkdir", 0);
-    // insert_file(buf, "cat", 0);
+    insert_file(buf, "cat", 0);
     insert_file(buf, "cp", 0);
     insert_file(buf, "mv", 0);
     insert_file(buf, "ls", 0);

@@ -17,5 +17,8 @@ void getArgument(char* input_buf, int *argc, char* argv);
 
 void parser(char* input_buf, char* output1, char* output2);
 
+void printFileContent(char *string);
 
+void printRec(char* path_str, byte current_dir);
+void printCWD(char* path_str, byte current_dir);
 #endif

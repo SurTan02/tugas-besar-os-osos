@@ -17,8 +17,5 @@ void readSector(byte *buffer, int sector_number);
 
 void executeProgram(struct file_metadata *metadata, int segment);
 
-void printFileContent(char *string);
-
-// void printReturnCode(char *arg, enum fs_retcode return_code);
 
 #endif
